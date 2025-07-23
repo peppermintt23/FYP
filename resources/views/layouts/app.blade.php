@@ -20,7 +20,7 @@
         <div class="min-h-screen flex">
 
             <!-- Main Content -->
-            <main class="ml-64 flex-1 bg-white p-8">
+            <main class="ml-64 flex-1 p-8">
                 {{ $slot }}
             </main>
 
@@ -32,7 +32,49 @@
                 window.location.href = "{{ route('login') }}"; // Redirect to login if user is not authenticated
             }
         </script>
-        
-    </body>
-</html>
 
+    <!-- Progress‐map component logic -->
+    
+<script>
+document.addEventListener('alpine:init', () => {
+  Alpine.data('progressMap', () => ({
+    percentages: [],
+    pathEl: null,
+    totalLen: 0,
+    currentIndex: 0,
+    jumping: false,
+
+    init(pcts) {
+      this.percentages  = pcts;
+      this.pathEl       = this.$refs.orbitPath;
+      this.totalLen     = this.pathEl.getTotalLength();
+
+      // position on last completed
+      let idx = this.percentages.findIndex(p => p < 100);
+      this.currentIndex = (idx === -1 ? this.percentages.length - 1 : Math.max(0, idx - 1));
+    },
+
+    planetStyle(i) {
+      const t  = i / ((this.percentages.length - 1) || 1);
+      const pt = this.pathEl.getPointAtLength(t * this.totalLen);
+      return { left: `${pt.x - 16}px`, top: `${pt.y - 16}px` };
+    },
+
+    astronautStyle() {
+      const t  = this.currentIndex / ((this.percentages.length - 1) || 1);
+      const pt = this.pathEl.getPointAtLength(t * this.totalLen);
+      return { left: `${pt.x - 24}px`, top: `${pt.y - 36}px` };
+    },
+
+    jumpTo(idx) {
+      this.currentIndex = idx;
+      this.jumping = true;
+      setTimeout(() => this.jumping = false, 700);
+    },
+  }));
+});
+</script>
+
+
+</body>
+</html>

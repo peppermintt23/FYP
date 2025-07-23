@@ -21,13 +21,14 @@ class User extends Authenticatable
         'name',
         'email',
         'phone_number',
-        'staff_id',
-        'student_id',
+        'staff_number',
+        'student_number',
         'password',
         'role',
         'position',
         'username',
         'room_number',
+        'avatar',  
     ];
 
     /**
@@ -60,9 +61,9 @@ class User extends Authenticatable
     // }
 
     public function courseEnrollments()
-{
-    return $this->hasMany(CourseEnrollment::class, 'student_id', 'id');
-}
+    {
+        return $this->hasMany(CourseEnrollment::class, 'student_id', 'id');
+    }
 
     public function student()
     {

@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Course;
+use Illuminate\Support\Arr;  
+use App\Models\Topic;
 
 class ProfileController extends Controller
 {
@@ -38,34 +40,37 @@ class ProfileController extends Controller
 
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-            'phone_number' => 'nullable|string|max:255',
-            'position' => 'nullable|string|max:255',
+            'student_number' => 'nullable|string|max:255,' . $user->id,
             'room_number' => 'nullable|string|max:255',
+            'avatar'         => 'nullable|string|max:255',
         ];
 
         // Add role-specific validation
         if ($user->role === 'lecturer') {
-            $rules['staff_id'] = 'nullable|string|max:255';
+            $rules['staff_number'] = 'nullable|string|max:255';
         }
 
         if ($user->role === 'student') {
-            $rules['student_id'] = 'nullable|string|max:255';
+            $rules['student_number'] = 'nullable|string|max:255';
+        }
+
+        if (!empty($data['avatar'])) {
+            $user->avatar = $rules['avatar'];
         }
 
         $validated = $request->validate($rules);
 
         // Filter based on role
         $updateFields = [
-            'name', 'email', 'phone_number', 'position', 'room_number'
+            'name', 'email', 'phone_number', 'position', 'room_number', 'avatar'
         ];
 
         if ($user->role === 'lecturer') {
-            $updateFields[] = 'staff_id';
+            $updateFields[] = 'staff_number';
         }
 
         if ($user->role === 'student') {
-            $updateFields[] = 'student_id';
+            $updateFields[] = 'student_number';
         }
 
         $userData = [];
@@ -74,7 +79,14 @@ class ProfileController extends Controller
                 $userData[$field] = $request->input($field);
                     }
                 }
-        $user->fill($userData)->save();
+
+         // 2) Save the chosen avatar filename
+        if (isset($data['avatar'])) {
+            $user->avatar = $userData['avatar'];
+        }
+
+        $userData = Arr::only($validated, $updateFields);
+        $user->update($userData);
 
                 return back()->with('status', 'profile-updated');
             }
@@ -131,6 +143,34 @@ class ProfileController extends Controller
         }
 
 
+        public function viewStudentProfile(Request $request): View
+        {
+            // $user is your User model, with role='student'
+            $user = $request->user();
 
+            $avatars = [
+                'A_BMO.png',
+                'A_Cake.png',
+                'A_Finn.png',
+                'A_Fiona.png',
+                'A_Flame_Princess.png',
+                'A_Gunter.png',
+                'A_Ice_King.png',
+                'A_Jake.png',
+                'A_lady_Rainicorn.png',
+                'A_Lemongrab.png',
+                'A_Lumpy_Space_Princess.png',
+                'A_Marceline.png',
+                'A_Pepperment_Butler.png',
+                'A_Slime_Princess.png',
+                'A_Tree_Trunks.png',
+            ];
+
+             $topics = Topic::with(['exercises.answers' => function($q) use ($user) {
+                $q->where('student_id', $user->id);
+            }])->get();
+
+            return view('viewStudentProfile', compact('user', 'avatars', 'topics'));
+        }
 
 }

@@ -12,8 +12,12 @@ use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\AnswerController;
 use App\Http\Controllers\CppCompilerController;
 use App\Http\Controllers\LecturerCourseController;
+use App\Http\Controllers\StudentDashboardController;
 use App\Models\CourseEnrollment;
 
+Route::get('/forgottt-password', function () {
+        return view('forgottt-password'); // ensure this matches your blade filename/casing
+    })->name('abc');
 
 Route::get('/', function () {
     return view('auth.login');
@@ -51,9 +55,14 @@ Route::middleware(['auth'])->group(function () {
     // -------------------------------
     // Student Routes
     // -------------------------------
-    Route::get('/student/dashboard', function () {
-        return view('student-dashboard');
-    })->name('student-dashboard');
+   // Route::get('/student/dashboard', function () {
+     //   return view('student-dashboard');
+    //})->name('student-dashboard');
+
+    // routes/web.php
+    Route::get('/student/dashboard', [App\Http\Controllers\StudentDashboardController::class, 'index'])
+        ->name('student-dashboard');
+
 
     // View and download notes
     Route::get('/student/notes', [NoteController::class, 'index'])->name('notes.index');
@@ -79,15 +88,32 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::get('/lecturer/manage-notes', [TopicController::class, 'manageNotes'])->name('manage.notes');
+    // View inline (instead of download)
+    Route::get('notes/{note}', [NoteController::class, 'show'])
+     ->name('notes.show');
 
     // Topics
     Route::get('/lecturer/topics', [TopicController::class, 'index'])->name('topics.index');
     Route::post('/lecturer/topics', [TopicController::class, 'store'])->name('topics.store');
     Route::delete('/lecturer/topics/{topic}', [TopicController::class, 'destroy'])->name('topics.destroy');
 
-    //Student Answers
+    //Student Answers List
     Route::get('/lecturer/studentAnswer/{exerciseId}/{groupId}', [AnswerController::class, 'studentAnswer'])
         ->name('studentAnswer');
+
+    // Lecturer view student answer in details
+    Route::get('/lecturer/studentAnswerDetail/{exerciseId}/{groupId}/{studentId}', 
+    [AnswerController::class, 'studentAnswerDetail'])
+    ->name('studentAnswerDetail');
+
+    // lecturer give score and feedback
+    Route::post('/lecturer/giveScore', [AnswerController::class, 'giveScore'])->name('answer.giveScore');
+    Route::post('/lecturer/giveFeedback', [AnswerController::class, 'giveFeedback'])->name('answer.giveFeedback');
+
+    // Save score and feedback given by lecturer
+    Route::post('/lecturer/saveScoresAndFeedback', 
+        [AnswerController::class, 'saveScoresAndFeedback'])
+        ->name('answer.saveScoresAndFeedback');
 
     // Notes
     Route::post('/lecturer/topics/{topic}/notes', [NoteController::class, 'store'])->name('notes.store');
@@ -111,10 +137,57 @@ Route::middleware(['auth'])->group(function () {
 
     // View student answers
     Route::get('/lecturer/exercises/{exercise}/answers', [ExerciseController::class, 'answers'])->name('exercises.answers');
+    
+    Route::get('/lecturer/studentAnswerDetail/{exerciseId}/{groupId}/{studentId}', [AnswerController::class, 'studentAnswerDetail'])->name('studentAnswerDetail');
 
     Route::get('/lecturer/profile', [LecturerCourseController::class, 'viewProfile'])->name('lecturer.profile.view');
     Route::get('/lecturer/profile/students/{courseEnrollmentId}', [LecturerCourseController::class, 'viewStudent'])->name('lecturer.course.students');
+
+    // Student leaderboard (personal)
+    Route::get('/student/leaderboard/personal', function () {
+        return view('leaderboardPersonal');
+    })->name('leaderboard.personal');
+
+    // Student leaderboard (overall)
+    Route::get('/student/leaderboard/overall', function () {
+        return view('leaderboardOverall');
+    })->name('leaderboard.overall');
+
+    // Lecturer view leaderboard 
+    Route::get('/lecturer/leaderboard/', function () {
+        return view('leaderboardLecturer');
+    })->name('leaderboard.lecturer');
+
+    // Lecturer view report
+    Route::get('/lecturer/report/', function () {
+        return view('viewStudentProgressReport');
+    })->name('report');
+
+    // //student view profile (UI)
+    // Route::get('/student/profile/', function () {
+    //     return view('viewStudentProfile');
+    // })->name('student.profile');
+
+    // Show student profile
+    Route::get('/student/profile', [ProfileController::class, 'viewStudentProfile'])
+         ->name('student.profile');
+
+    // Update profile (name, email, avatar, etc.)
+    Route::put('/profile', [ProfileController::class, 'update'])
+         ->name('profile.update');
+
+    // //lecturer view profile (UI)
+    // Route::get('/lecturer/profilee', function () {
+    //     return view('viewLecturerProfileUI');
+    // })->name('lecturerr.profile'); 
 });
+
+// routes/web.php
+
+// Only accessible to guests — won't try to auth them or redirect back.
+
+
 
 // Auth routes
 require __DIR__ . '/auth.php';
+

@@ -9,7 +9,7 @@ class Topic extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['topic_title'];
+    protected $fillable = ['topic_title', 'course_id',];
     public function notes()
     {
         return $this->hasMany(Note::class);

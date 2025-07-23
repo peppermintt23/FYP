@@ -1,10 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 class="text-lg font-medium text-white">
             {{ __('Profile Information') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm text-white">
             {{ __("Update your account's profile information and email address.") }}
         </p>
     </header>
@@ -19,7 +19,7 @@
 
         {{-- Name --}}
         <div>
-            <x-input-label for="name" :value="__('Name')" />
+            <x-input-label class="text-white" for="name" :value="__('Name')" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                 :value="old('name', $user->name)" required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
@@ -28,26 +28,26 @@
         {{-- Staff ID --}}
         @if (auth()->user()->role === 'lecturer')
         <div>
-            <x-input-label for="staff_id" :value="__('Staff ID')" />
-            <x-text-input id="staff_id" name="staff_id" type="text" class="mt-1 block w-full"
-                :value="old('staff_id', $user->staff_id)" autocomplete="off" />
-            <x-input-error class="mt-2" :messages="$errors->get('staff_id')" />
+            <x-input-label class="text-white" for="staff_number" :value="__('Staff ID')" />
+            <x-text-input id="staff_number" name="staff_number" type="text" class="mt-1 block w-full"
+                :value="old('staff_number', $user->staff_number)" autocomplete="off" />
+            <x-input-error class="mt-2" :messages="$errors->get('staff_number')" />
         </div>
         @endif
 
         @if (auth()->user()->role === 'student')
         {{-- Student ID --}}
         <div>
-            <x-input-label for="student_id" :value="__('Student ID')" />
-            <x-text-input id="student_id" name="student_id" type="text" class="mt-1 block w-full"
-                :value="old('student_id', $user->student_id)" autocomplete="off" />
-            <x-input-error class="mt-2" :messages="$errors->get('student_id')" />
+            <x-input-label class="text-white" for="student_number" :value="__('Student Number')" />
+            <x-text-input id="student_number" name="student_number" type="text" class="mt-1 block w-full"
+                :value="old('student_number', $user->student_number)" autocomplete="off" />
+            <x-input-error class="mt-2" :messages="$errors->get('student_number')" />
         </div>
         @endif
 
         {{-- Phone Number --}}
         <div>
-            <x-input-label for="phone_number" :value="__('Phone Number')" />
+            <x-input-label class="text-white" for="phone_number" :value="__('Phone Number')" />
             <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full"
                 :value="old('phone_number', $user->phone_number)" autocomplete="tel" />
             <x-input-error class="mt-2" :messages="$errors->get('phone_number')" />
@@ -56,7 +56,7 @@
         {{-- Position --}}
         @if (auth()->user()->role === 'lecturer')
         <div>
-            <x-input-label for="position" :value="__('Position')" />
+            <x-input-label class="text-white" for="position" :value="__('Position')" />
             <x-text-input id="position" name="position" type="text" class="mt-1 block w-full"
                 :value="old('position', $user->position)" />
             <x-input-error class="mt-2" :messages="$errors->get('position')" />
@@ -64,7 +64,7 @@
         
         {{-- Room Number --}}
         <div>
-            <x-input-label for="room_number" :value="__('Room Number')" />
+            <x-input-label class="text-white" for="room_number" :value="__('Room Number')" />
             <x-text-input id="room_number" name="room_number" type="text" class="mt-1 block w-full"
                 :value="old('room_number', $user->room_number)" />
             <x-input-error class="mt-2" :messages="$errors->get('room_number')" />
@@ -73,17 +73,17 @@
 
         {{-- Email --}}
         <div>
-            <x-input-label for="email" :value="__('Email')" />
+            <x-input-label class="text-white" for="email" :value="__('Email')" />
             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                 :value="old('email', $user->email)" required autocomplete="email" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-800">
+                    <p class="text-sm mt-2 text-white">
                         {{ __('Your email address is unverified.') }}
                         <button form="send-verification"
-                            class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            class="underline text-sm text-white hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             {{ __('Click here to re-send the verification email.') }}
                         </button>
                     </p>
@@ -98,7 +98,7 @@
 
         {{-- Role (read-only) --}}
         <div>
-            <x-input-label for="role" :value="__('Role')" />
+            <x-input-label class="text-white" for="role" :value="__('Role')" />
             <x-text-input id="role" name="role" type="text" class="mt-1 block w-full bg-gray-100" :value="$user->role" readonly />
         </div>
 
@@ -109,7 +109,7 @@
             @if (session('status') === 'profile-updated')
                 <p x-data="{ show: true }" x-show="show" x-transition
                    x-init="setTimeout(() => show = false, 2000)"
-                   class="text-sm text-gray-600">
+                   class="text-sm text-white">
                     {{ __('Saved.') }}
                 </p>
             @endif

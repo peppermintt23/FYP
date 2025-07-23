@@ -1,4 +1,4 @@
-<x-app-layout>
+{{-- <x-app-layout>
     <div class="min-h-screen bg-white text-gray-900">
 
         <!-- Top Header -->
@@ -70,20 +70,36 @@
         <!-- Main Content -->
         <div class="relative max-w-4xl mx-auto mt-10 bg-purple-900/30 text-white p-6 rounded-lg">
                 
-                <!-- Close Button -->
-                <a href="{{ route('answer.index') }}" 
-                    class="absolute top-4 right-4 text-white text-lg font-bold hover:text-red-400"
-                    title="Close">
-                    &times;
-                </a>
+            <!-- Close Button -->
+            <a href="{{ route('answer.index') }}" 
+                class="absolute top-4 right-4 text-white text-3xl font-bold hover:text-red-400"
+                title="Close">
+                &times;
+            </a>
 
             <h2 class="text-2xl font-semibold mb-4">Output</h2>
 
-            <p class="mb-4"><strong>Your Answer:</strong></p>
-            <pre class="bg-gray-800 text-white p-4 rounded">{{ $answer->answer }}</pre>
+            <p class="mb-4"><strong>Your Answers:</strong></p>
+            
+            @if($parentAnswer && $parentAnswer->answer)
+                <div class="mb-2">
+                    <strong>Compiled Code:</strong>
+                    <pre class="bg-gray-800 text-white p-4 rounded">{{ $parentAnswer->answer }}</pre>
+                </div>
+            @endif
 
-            <p class="mt-4"><strong>Score:</strong> {{ $answer->student_score ?? 'Pending' }}</p>
-            <p class="mt-2"><strong>Lecturer Feedback:</strong> {{ $answer->feedback ?? 'No feedback yet.' }}</p>
+
+            @forelse($answers as $ans)
+                <div class="mb-2">
+                    <strong>Step {{ $ans->step_number }}:</strong>
+                    <pre class="bg-gray-200 text-black p-4 rounded">{{ $ans->answer }}</pre>
+                </div>
+            @empty
+                <pre class="bg-gray-800 text-white p-4 rounded">No answers submitted.</pre>
+            @endforelse
+
+            <p class="mt-4"><strong>Score:</strong> {{ $parentAnswer->student_score ?? 'Pending' }}</p>
+            <p class="mt-2"><strong>Lecturer Feedback:</strong> {{ $parentAnswer->feedback ?? 'No feedback yet.' }}</p>
         </div>
     </div>
-</x-app-layout>
+</x-app-layout> --}}

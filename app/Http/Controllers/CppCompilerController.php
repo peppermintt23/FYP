@@ -64,7 +64,7 @@ class CppCompilerController extends Controller
                 ->where('exercise_id', $exercise_id)
                 ->where('category', $cmp)
                 ->where('step_number', 100) // special marker
-                ->first();
+                ->first();  
 
             if (!$existing) {
                 Answer::create([
@@ -72,6 +72,7 @@ class CppCompilerController extends Controller
                     'student_id' => auth()->id(),
                     'step_number' => 100,
                     'answer' => $code,
+                    'parent_answer_id' => 0,
                     'category' => $cmp,
                     'compiler_output' => $output,
                     'student_score' => $student_score

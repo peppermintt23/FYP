@@ -7,23 +7,29 @@ use App\Models\CourseEnrollment;
 
 class LecturerCourseController extends Controller
 {
-public function viewProfile()
-{
-    $lecturer = auth()->user();
+    public function viewProfile()
+    {
+        $lecturer = auth()->user();
 
-    $courseEnrollments = CourseEnrollment::where('lecturer_id', $lecturer->id)
-        ->get();
+        $courseEnrollments = CourseEnrollment::where('lecturer_id', $lecturer->id)
+            ->get();
 
-    // group by groupCourse for the Blade view
-    $groupedEnrollments = $courseEnrollments->groupBy('groupCourse');
+        // group by groupCourse for the Blade view
+        $groupedEnrollments = $courseEnrollments->groupBy('groupCourse');
 
-    return view('viewLecturerProfile', [
-        'lecturer' => $lecturer,
-        'groupedEnrollments' => $groupedEnrollments
-    ]);
-}
+        // Add students_count property to each group (Collection)
+        foreach ($groupedEnrollments as $groupCourse => $enrollments) {
+            // Only count enrollments that have a student attached
+            $groupedEnrollments[$groupCourse]->students_count = $enrollments->filter(function ($enrollment) {
+                return $enrollment->student !== null;
+            })->count();
+        }
 
-
+        return view('viewLecturerProfile', [
+            'lecturer' => $lecturer,
+            'groupedEnrollments' => $groupedEnrollments
+        ]);
+    }
 
     public function viewStudent(Request $request, $courseEnrollmentId)
     {
@@ -33,15 +39,21 @@ public function viewProfile()
             abort(403, 'Unauthorized');
         }
 
-        // Make sure this enrollment belongs to the lecturer
-        $courseEnrollment = CourseEnrollment::with('students')
-                            ->where('id', $courseEnrollmentId)
-                            ->where('lecturer_id', $lecturer->id)
-                            ->firstOrFail();
+        // Get groupCourse from the query string (e.g. ?groupCourse=CDCS2402A)
+        $groupCourse = $request->query('groupCourse');
+
+        // Get all enrollments for this groupCourse for this lecturer
+        $enrollments = CourseEnrollment::where('lecturer_id', $lecturer->id)
+            ->where('groupCourse', $groupCourse)
+            ->with('student')
+            ->get();
 
         return view('studentList', [
-            'enrollments' => collect([$courseEnrollment]),
-            'groupCourse' => $courseEnrollment->groupCourse
+            'enrollments' => $enrollments,
+            'groupCourse' => $groupCourse,
         ]);
     }
+
 }
+
+//BEFORE TUKARRRR

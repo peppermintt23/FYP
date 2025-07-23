@@ -14,13 +14,23 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-white-900 antialiased">  
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-white">
-        
+    <body class="font-sans antialiased bg-[#050e1a] text-white">
+        <div class="min-h-screen flex flex-col justify-center items-center pt-6 sm:pt-0 bg-[#050e1a]">
             <!--box-->
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-200 shadow-md overflow-hidden sm:rounded-lg">
+            <div class="bg-[#101b2a] neon-frame w-full max-w-md mx-auto p-10 rounded-2xl shadow-lg">
                 {{ $slot }}
             </div>
         </div>
+
+        <style>
+        .neon-frame {
+            background: rgba(10, 10, 30, 0.97);
+            border: 3px solid #15f7fc;
+            border-radius: 22px;
+            box-shadow: 0 0 24px 5px #15f7fc, 0 0 44px 1px #00bfff85 inset, 0 0 0 9px #061928;
+            position: relative;
+            overflow: hidden;
+        }
+        </style>
     </body>
 </html>

@@ -12,11 +12,9 @@ use Illuminate\Http\Request;
 class AnswerController extends Controller
 {
 
-    public function submitFeedback(){
 
-    }
 
-    // for lecturer page: view studemt answer
+    // for lecturer page: view student answer
     public function studentAnswer($exerciseId, $groupId)
     {
         $lecturerId = auth()->id();
@@ -33,27 +31,13 @@ class AnswerController extends Controller
             })
             ->get();
 
+
+
         $exercise = Exercise::findOrFail($exerciseId);
 
-        return view('studentAnswer', compact('answers', 'exercise', 'exerciseId', 'groupId'));
+        return view('studentAnswerList', compact('answers', 'exercise', 'exerciseId', 'groupId'));
     }
 
-    public function showCompiler(Exercise $exercise, Request $request)
-    {
-        // Eager load guidelines
-        $exercise->load('guidelines');
-
-        // Get student_id from request parameter, fallback to logged-in user
-        $student_id = $request->input('student_id', auth()->id());
-        dd($student_id);
-        // Find existing answer
-        $existingAnswer = Answer::where('exercise_id', $exercise->id)
-            ->where('student_id', $student_id)
-            ->where('category', 'Need-Compiler')
-            ->first();//main answer sebab ada needcomplier
-
-        return view('show', compact('exercise', 'existingAnswer'));
-    }
 
     //student view list of exercise
     public function index()
@@ -71,14 +55,30 @@ class AnswerController extends Controller
         $exercise->load('guidelines');
 
         $studentId = $request->input('student_id', auth()->id());
+        //dd($studentId);
 
+        // find any existing record (just to maybe preload)
         $existingAnswer = Answer::where('exercise_id', $exercise->id)
             ->where('student_id', $studentId)
             ->first();
 
-        return view('takeExercise', compact('exercise', 'existingAnswer', 'studentId'));
-    }
+        $submittedGuideline = Answer::where('exercise_id', $exercise->id)
+            ->where('student_id', $studentId)
+            ->where('status', operator: Answer::STATUS_1)
+            ->first();
 
+        $submittedCode = Answer::where('exercise_id', $exercise->id)
+            ->where('student_id', $studentId)
+            ->where('status', operator: Answer::STATUS_2)
+            ->first();
+
+        $submittedFeedback = Answer::where('exercise_id', $exercise->id)
+            ->where('student_id', $studentId)
+            ->where('status', operator: Answer::STATUS_3)
+            ->first();
+        //dd($existingAnswer->status);
+        return view('takeExercise', compact('exercise', 'submittedFeedback','existingAnswer', 'submittedGuideline', 'submittedCode', 'studentId'));
+    }
 
     //for student page: submit exercise
     public function submitFinalExercise(Request $request, Exercise $exercise)
@@ -88,43 +88,44 @@ class AnswerController extends Controller
         Answer::where('student_id', auth()->id())
             ->where('exercise_id', $exercise->id)
             ->where('category', $category)
-            ->update(['status' => 'Submitted Answer ']);
+            ->update(['status' => Answer::STATUS_2]);
 
         return redirect()->route('answer.show', ['exercise' => $exercise->id])
             ->with('info', 'Your compiler answer has been submitted!');
     }
-
-
-
 
     //for student page: submit exercise
     public function submitExercise(Request $request, Exercise $exercise)
     {
         $request->validate([
             'student_answer' => 'required|array',
-            'student_answer.*' => 'required|string'
+            'student_answer.*' => 'required|string',
+            'status' => Answer::STATUS_1
+
         ]);
 
-        // Check if student already submitted an answer
-        $existing = Answer::where('student_id', auth()->id())
+        // Check if student already submitted an guidelines
+        $alreadySubmitted = Answer::where('student_id', auth()->id())
             ->where('exercise_id', $exercise->id)
+            ->where('status', Answer::STATUS_1)
             ->first();
 
-        if ($existing) {
-            return redirect()->route('answer.feedback', ['exercise' => $exercise->id])
+        if ($alreadySubmitted) {
+            return redirect()->route('answer.show', ['exercise' => $exercise->id])
                 ->with('info', 'You have already submitted this exercise.');
         }
 
         $mainAnswerThatNeedToAnswerAfterSubmitAnswerGuidelines = Answer::create([
-                'category' => 'Need-Compiler',
-                'exercise_id' => $exercise->id,
-                'student_id' => auth()->id(),
-                'step_number' => 100,
-                'answer' => '',
-                'parent_answer_id' => 0,
-                'student_score' => 0
-            ]);
-            $pa = $mainAnswerThatNeedToAnswerAfterSubmitAnswerGuidelines;
+            'category' => 'Need-Compiler',
+            'exercise_id' => $exercise->id,
+            'student_id' => auth()->id(),
+            'step_number' => 100,
+            'answer' => '',
+            'parent_answer_id' => 0,
+            'student_score' => 0,
+            'status' => Answer::STATUS_1
+        ]);
+        $pa = $mainAnswerThatNeedToAnswerAfterSubmitAnswerGuidelines;
 
         //optional if have guideline
         foreach ($request->student_answer as $step_number => $answer) {
@@ -134,7 +135,7 @@ class AnswerController extends Controller
                 'student_id' => auth()->id(),
                 'step_number' => $step_number,
                 'answer' => $answer,
-                'parent_answer_id' => $pa->id ,
+                'parent_answer_id' => $pa->id,
                 'student_score' => 0
             ]);
         }
@@ -143,15 +144,119 @@ class AnswerController extends Controller
             ->with('info', 'Answer checked!');
     }
 
-
     public function feedback(Exercise $exercise)
     {
-        $answer = $exercise->answers()->where('student_id', auth()->id())->first();
+        $studentId = auth()->id();
 
-        if (!$answer) {
-            return redirect()->route('answer.index')->with('error', 'Answer not found.');
+        // Fetch all answer rows for this exercise & student, ordered by step number
+        $answers = Answer::where('exercise_id', $exercise->id)
+            ->where('student_id', $studentId)
+            ->where('category', 'Non-Compiler')
+            ->orderBy('step_number')
+            ->get();
+
+        // Get the parent answer (for feedback & overall score)
+        $parentAnswer = Answer::where('exercise_id', $exercise->id)
+            ->where('student_id', $studentId)
+            ->where('parent_answer_id', 0)
+            ->first();
+
+        return view('viewFeedback', compact('exercise', 'answers', 'parentAnswer'));
+    }
+
+
+    public function studentAnswerDetail($exerciseId, $groupId, $studentId)
+    {
+        // get exercise info
+        $exercise = Exercise::findOrFail($exerciseId);
+
+        // get answers submitted by the student
+        $answers = Answer::where('exercise_id', $exerciseId)
+            ->where('student_id', $studentId)
+            ->get();
+
+        // optionally get parent to show compiler type too
+        $parentAnswer = Answer::where('exercise_id', $exerciseId)
+            ->where('student_id', $studentId)
+            ->where('parent_answer_id', 0)
+            ->first();
+
+        return view('studentAnswerDetail', compact('exercise', 'answers', 'groupId', 'studentId', 'parentAnswer'));
+    }
+
+    public function giveScore(Request $request)
+    {
+        $request->validate([
+            'answer_id' => 'required|exists:answers,id',
+            'score' => 'required|integer|min:0|max:100',
+        ]);
+
+        $answer = Answer::findOrFail($request->answer_id);
+        $answer->student_score = $request->score;
+        $answer->save();
+
+        return back()->with('success', 'Score updated!');
+    }
+    public function giveFeedback(Request $request)
+    {
+        $request->validate([
+            'answer_id' => 'required|exists:answers,id',
+            'feedback' => 'required|string',
+            'score' => 'required|numeric|min:0|max:20'
+        ]);
+
+        $answer = Answer::findOrFail($request->answer_id);
+        $answer->feedback = $request->feedback;
+        $answer->student_score = $request->score;
+        $answer->status = Answer::STATUS_3;
+
+        if (!$answer->save()) {
+            return back()->with('error', 'Failed to save feedback. Please try again.');
+        }
+        return back()->with('success', 'Feedback saved!');
+    }
+
+
+    public function saveScoresAndFeedback(Request $request)
+    {
+
+        $exerciseId = $request->input('exercise_id');
+        $groupId = $request->input('group_id');
+        $studentId = $request->input('student_id');
+
+        $request->validate([
+            'scores' => 'required|array',
+            'scores.*' => 'nullable|integer|min:0|max:100',
+            'feedback' => 'nullable|string',
+            'exercise_id' => 'required|integer',
+            'student_id' => 'required|integer'
+        ]);
+
+        // update each individual score
+        foreach ($request->scores as $answerId => $score) {
+            $answer = Answer::find($answerId);
+            if ($answer && $answer->student_id == $request->student_id) {
+                $answer->student_score = $score;
+                $answer->save();
+            }
         }
 
-        return view('viewFeedback', compact('exercise', 'answer'));
+        // update feedback in parent answer
+        $parentAnswer = Answer::where('exercise_id', $request->exercise_id)
+            ->where('student_id', $request->student_id)
+            ->where('parent_answer_id', 0)
+            ->first();
+
+        if ($parentAnswer) {
+            $parentAnswer->feedback = $request->feedback;
+            $parentAnswer->save();
+        }
+
+        return redirect()->route('studentAnswerDetail', [$exerciseId, $groupId, $studentId])
+            ->with('success', 'Successfully saved feedback and scores for student!');
+
+        // return back()->with('success', 'Successfully saved feedback and scores for student');
+
     }
+    
 }

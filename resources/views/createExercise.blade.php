@@ -1,29 +1,28 @@
 <x-app-layout>
-    <div class="min-h-screen bg-white text-gray-900">
+    <div class="min-h-screen bg-[#050e1a] text-white">
         <!-- Top Header -->
-        <div class="bg-white p-4 flex justify-end">
+        <div class="bg-[#071c2d] px-8 py-4 flex justify-end shadow z-40 fixed left-0 right-0 top-0">
             <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open" class="flex items-center space-x-2 text-gray-800 focus:outline-none">
+                <button @click="open = !open" class="flex items-center space-x-2 text-cyan-200 focus:outline-none">
                     <span class="font-semibold">{{ Auth::user()->name }}</span>
                     <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
-                
                 <!-- Dropdown Menu -->
                 <div x-show="open" 
                      @click.away="open = false"
                      x-transition
-                     class="absolute right-0 mt-2 w-48 bg-white rounded shadow-md divide-y divide-gray-200">
+                     class="absolute right-0 mt-2 w-48 bg-[#101b2a] border border-cyan-400 rounded shadow-md divide-y divide-gray-200 z-50">
                     <div class="py-1">
-                        <a href="{{ route('lecturer.profile.view') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="{{ route('lecturer.profile.view') }}" class="block px-4 py-2 text-sm text-cyan-200 hover:bg-cyan-900 hover:text-white">
                             Profile
                         </a>
                     </div>
                     <div class="py-1">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-cyan-200 hover:bg-cyan-900 hover:text-white">
                                 Logout
                             </button>
                         </form>
@@ -33,190 +32,170 @@
         </div>
 
         <!-- Sidebar -->
-        <aside class="fixed left-0 top-0 h-screen w-64 bg-[#A66FB5] text-white p-6">
-            <!-- Logo Area -->
-            <div class="mb-8">
-                <div class="flex items-center space-x-3">
-                    <img src="{{ asset('asset/logo.png') }}" alt="CQPP Logo" class="w-8 h-8">
-                    <span class="text-2xl font-bold text-white">CQPP</span>
-                </div>
+        <aside class="fixed left-0 top-0 h-screen w-64 neon-sidebar text-white p-6 pt-8 z-50">
+            <div class="mb-8 flex items-center space-x-3">
+                <img src="{{ asset('asset/logo.png') }}" alt="CQPP Logo" class="w-8 h-8">
+                <span class="text-2xl font-bold text-[#13e2be]">CQPP</span>
             </div>
-
-            <!-- Navigation Menu -->
             <nav class="space-y-4">
-                <a href="dashboard" class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                    </svg>
+                <a href="dashboard" class="sidebar-link">
                     <span>Dashboard</span>
                 </a>
-                <a href="#" class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                    </svg>
-                    <span>List of classes</span>
+                <a href="{{ route('manage.notes') }}" class="sidebar-link">
+                    <span>Manage Learning Material</span>
                 </a>
-
-                <a href="{{ route('manage.notes') }}" class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                    </svg>
-                    <span>Manage Notes</span>
-                </a>
-                <a href="{{ route('exercises.manage', $topic->id ?? 1) }}" class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
+                <a href="{{ route('exercises.manage', $topic->id ?? 1) }}" class="sidebar-link">
                     <span>Manage Exercise</span>
                 </a>
-                <a href="#" class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
+                <a href="{{ route('leaderboard.lecturer') }}" class="sidebar-link">
                     <span>Leaderboard</span>
                 </a>
-                <a href="#" class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                    </svg>
+                <a href="#" class="sidebar-link">
                     <span>Progress Report</span>
                 </a>
             </nav>
         </aside>
 
-         <!-- Main Content Wrapper -->
-        <main class="ml-64 p-8 flex justify-center">
-            <!-- Inner content container -->
-
-            <!-- Close Button -->
-                <a href="{{ route('exercises.manage') }}"
-                    class="absolute top-4 right-4 text-gray-600 bg-gray-200 hover:bg-gray-400 hover:text-white px-4 py-2 rounded-lg shadow transition duration-150 z-50">
-                    &times;
-                </a>
+        <!-- Main Content Wrapper -->
+        <main class="ml-64 pt-24 px-0 flex min-h-screen justify-start gap-x-2">
+           
+            <div class="w-full max-w-3xl p-0 mt-6">
                 
-            <div class="w-full max-w-5xl mx-auto p-8 bg-white shadow-lg rounded-xl mt-10">
-            
- @if(session('success'))
-                    <div class="bg-green-200 text-green-900 p-4 rounded text-sm mb-4">
-                        {{ session('success') }}
-                    </div>
-                @endif
-                
-                <h2 class="text-3xl font-bold mb-6 text-gray-800">Create Exercise for "{{ $topic->topic_title }}"</h2>
-
-                <form action="{{ route('exercises.store', $topic->id) }}" method="POST">
-                    @csrf
-
-                    <!-- Exercise Title -->
-                    <label class="block mb-2 font-semibold text-gray-700">Exercise Title</label>
-                    <input type="text" name="exercise_title" class="w-full p-3 mb-5 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
-
-                    <!-- Question -->
-                    <label class="block mb-2 font-semibold text-gray-700">Question</label>
-                    <textarea name="question" rows="4" class="w-full p-3 mb-5 border rounded focus:outline-none focus:ring focus:border-blue-300" required></textarea>
-
-                    <label class="block mb-2 font-semibold text-gray-700">Expected Output</label>
-                    <input type="text" name="expected_output"  class="w-full p-3 mb-5 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
-
-
-                    <!-- Hint -->
-                    <label class="block mb-2 font-semibold text-gray-700">Hint (Optional)</label>
-                    <textarea name="hint" rows="2" class="w-full p-3 mb-5 border rounded focus:outline-none focus:ring focus:border-blue-300"></textarea>
-
-                    <!-- Score -->
-                    <label class="block mb-2 font-semibold text-gray-700">Score</label>
-                    <input type="number" name="score" min="0" class="w-full p-3 mb-5 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
-
+                <div class="relative neon-frame p-8">
                     
-                    <!-- has_guideline -->
-                   
-                    <label for="has_guideline" class="block mb-2 font-semibold text-gray-700">Do you want to add guidelines?</label>
-                    <select name="has_guideline" id="has_guideline" class="w-full p-3 mb-5 border rounded focus:outline-none focus:ring focus:border-blue-300">
-                        <option value="No">No</option>
-                        <option value="Yes">Yes</option>
-                    </select>
-                     <div>
-                        <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-150 ease-in-out">
-                            Create Exercise
-                        </button>
-                    </div>
-                </form>
-{{-- 
-                    <!-- Guidelines Section (conditionally displayed) -->
-                    <div id="guideline-steps" class="space-y-6 mb-6" style="display: none;">
-                        <div class="step p-4 border border-gray-300 rounded-md bg-gray-50">
-                            <label class="block mb-2 font-semibold text-gray-600">Step Number</label>
-                            <input type="text" name="guidelines[0][step_number]" class="w-full p-2 mb-4 border rounded" required>
+                    <!-- Close Button -->
+                    <a href="{{ route('exercises.manage') }}"
+                        class="absolute top-4 right-4 text-[#15f7fc] bg-[#071c2d] border-2 border-cyan-400 hover:bg-[#0a2239] hover:text-white px-4 py-2 rounded-xl shadow transition duration-150 z-50 text-3xl flex items-center justify-center"
+                        style="line-height: 1;">
+                        &times;
+                    </a>
 
-                            <label class="block mb-2 font-semibold text-gray-600">Step Description</label>
-                            <input type="text" name="guidelines[0][step_description]" class="w-full p-2 mb-4 border rounded" required>
-
-                            <label class="block mb-2 font-semibold text-gray-600">Expected Code</label>
-                            <textarea name="guidelines[0][expected_code]" rows="4" class="w-full p-2 border rounded" required></textarea>
+                    @if(session('success'))
+                        <div class="bg-[#0e5246] text-[#12ffb7] border-l-4 border-[#13e2be] p-4 rounded text-sm mb-4 shadow-lg">
+                            {{ session('success') }}
                         </div>
-                    </div>
- 
-                    <!-- Add Step Button -->
-                    <button type="button" onclick="addStep()" class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 transition duration-150 ease-in-out mb-6" id="add-step-btn" style="display: none;">
-                        + Add Another Step
-                    </button>
+                    @endif
 
-                    <!-- Submit Button -->
-                    <div>
-                        <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-150 ease-in-out">
-                            Create Exercise
-                        </button>
-                    </div>
-                </form>
-            </div> --}}
+                    <h2 class="text-3xl font-bold mb-6 text-cyan-300">
+                        Create Exercise for "{{ $topic->topic_title }}"
+                    </h2>
 
-            <script>
-                let stepIndex = 1;
+                    <form action="{{ route('exercises.store', $topic->id) }}" method="POST">
+                        @csrf
 
-                // Handle display of guidelines section based on "Yes/No" selection
-                document.getElementById('has_guideline').addEventListener('change', function () {
-                    const guidelineSection = document.getElementById('guideline-steps');
-                    const addButton = document.getElementById('add-step-btn');
-                    if (this.value == '1') {
-                        guidelineSection.style.display = 'block';
-                        addButton.style.display = 'inline-block';
-                    } else {
-                        guidelineSection.style.display = 'none';
-                        addButton.style.display = 'none';
-                    }
-                });
+                        <!-- Exercise Title -->
+                        <label class="block mb-2 font-bold text-cyan-200">Exercise Title</label>
+                        <input type="text" name="exercise_title" class="w-full neon-input mb-5" required>
 
-                // Function to add more steps
-                function addStep() {
-                    const container = document.getElementById('guideline-steps');
+                        <!-- Question -->
+                        <label class="block mb-2 font-bold text-cyan-200">Question</label>
+                        <textarea name="question" rows="4" class="w-full neon-input mb-5" required></textarea>
 
-                    const stepHTML = `
-                    <div class="step p-4 relative border border-gray-300 rounded-md bg-gray-50">
-                        <label class="block mb-2 font-semibold text-gray-600">Step Number</label>
-                        <input type="text" name="guidelines[${stepIndex}][step_number]" class="w-full p-2 mb-4 border rounded" required>
-                        
-                        <label class="block mb-2 font-semibold text-gray-600">Step Description</label>
-                        <input type="text" name="guidelines[${stepIndex}][step_description]" class="w-full p-2 mb-4 border rounded" required>
+                        <!-- Expected Output -->
+                        <label class="block mb-2 font-bold text-cyan-200">Expected Output</label>
+                        <input type="text" name="expected_output" class="w-full neon-input mb-5" required>
 
-                        <label class="block mb-2 font-semibold text-gray-600">Expected Code</label>
-                        <textarea name="guidelines[${stepIndex}][expected_code]" rows="4" class="w-full p-2 border rounded" required></textarea>
-                        <button type="button" class="delete-step absolute bottom-2 right-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-500 transition duration-150 ease-in-out">Delete Step</button>
-                    </div>
-                    `;
+                        <!-- Hint -->
+                        <label class="block mb-2 font-bold text-cyan-200">Hint (Optional)</label>
+                        <textarea name="hint" rows="2" class="w-full neon-input mb-5"></textarea>
 
-                    container.insertAdjacentHTML('beforeend', stepHTML);
-                    stepIndex++;
-                }
+                        <!-- Score -->
+                        <label class="block mb-2 font-bold text-cyan-200">Score</label>
+                        <input type="number" name="score" min="0" class="w-full neon-input mb-5" required>
 
-                // Delete step functionality
-                document.addEventListener('click', function (e) {
-                    if (e.target && e.target.classList.contains('delete-step')) {
-                        const stepDiv = e.target.closest('.step');
-                        stepDiv.remove();
-                    }
-                });
-
-            </script>
+                        <!-- has_guideline -->
+                        <label for="has_guideline" class="block mb-2 font-bold text-cyan-200">Do you want to add guidelines?</label>
+                        <select name="has_guideline" id="has_guideline" class="w-full neon-input mb-8">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                        <div>
+                            <button type="submit" class="neon-btn bg-gradient-to-r from-[#15f7fc] to-[#1de9b6]">
+                                Create Exercise
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </main>
+
     </div>
+
+    <!-- Neon Styles -->
+    <style>
+        html, body {
+            background: #050e1a !important;
+            min-height: 100vh;
+            width: 100vw;
+        }
+        .neon-frame {
+            background: rgba(10, 10, 30, 0.98);
+            border: 3px solid #15f7fc;
+            border-radius: 22px;
+            box-shadow: 0 0 24px 5px #15f7fc, 0 0 44px 1px #00bfff85 inset, 0 0 0 9px #061928;
+            position: relative;
+            overflow: hidden;
+        }
+        .neon-input {
+            border: 1.5px solid #15f7fc;
+            background: #071c2d;
+            color: #c9fbff;
+            border-radius: 8px;
+            padding: 0.7rem 1.2rem;
+            outline: none;
+            font-size: 1.08rem;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        .neon-input:focus {
+            border: 2px solid #14e1ee;
+            background: #0a132a;
+            color: #00fff3;
+            box-shadow: 0 0 12px #19ffe799;
+        }
+        .neon-btn {
+            border: none;
+            outline: none;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 0.6rem 2rem;
+            box-shadow: 0 0 10px #14e1ee44;
+            transition: background 0.22s, box-shadow 0.22s, color 0.16s, filter 0.22s;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        .neon-btn:hover {
+            filter: brightness(1.13) saturate(1.4);
+            box-shadow: 0 0 22px #15f7fc77;
+        }
+        .sidebar-link {
+            background: transparent;
+            border: 2px solid transparent;
+            border-radius: 2px;
+            color: #c9fbff;
+            font-weight: 500;
+            transition: all 0.18s;
+            letter-spacing: 1.2px;
+            padding: 0.75rem 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar-link:hover, .sidebar-link.active {
+            background: #142755bb;
+            border-color: #15f7fc;
+            color: #15f7fc;
+            box-shadow: 0 0 10px #15f7fc44;
+        }
+        .neon-sidebar {
+            background: #0a132a;
+            border-right: 3.5px solid #13e2be;
+            box-shadow: 0 0 12px #13e2be44, 0 4px 24px #0a243155;
+        }
+        .neon-step {
+            background: rgba(10, 40, 60, 0.82);
+            border: 2px solid #15f7fc66;
+            border-radius: 16px;
+            box-shadow: 0 2px 16px #13bcff44;
+        }
+    </style>
 </x-app-layout>
