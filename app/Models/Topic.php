@@ -30,4 +30,7 @@ class Topic extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
+    public function lecturer() {
+        return $this->belongsTo(User::class, 'lecturer_id');
+    }
 }

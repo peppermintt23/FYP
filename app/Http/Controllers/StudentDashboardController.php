@@ -14,11 +14,16 @@ class StudentDashboardController extends Controller
     {
         $studentId = Auth::id();
         $enrollment = CourseEnrollment::where('student_id', $studentId)->first();
-        $courseId   = $enrollment ? $enrollment->course_id : null;
 
-        // 2) Load topics with their exercises
-        $topics = Topic::with(['exercises' => function($q) {
-                $q->orderBy('id');
+        $courseId     = $enrollment ? $enrollment->course_id : null;
+        $groupCourse  = $enrollment ? $enrollment->groupCourse : null;
+        $lecturerId   = $enrollment ? $enrollment->lecturer_id : null;
+
+       // Load topics for this course only
+        $topics = Topic::with(['exercises' => function($q) use ($groupCourse, $lecturerId) {
+                $q->where('groupCourse', $groupCourse)
+                  ->where('lecturer_id', $lecturerId)
+                  ->orderBy('id');
             }])
             ->where('course_id', $courseId)
             ->get();
@@ -32,10 +37,10 @@ class StudentDashboardController extends Controller
         foreach ($topics as $topic) {
             $exercises      = $topic->exercises;
             $totalExercises = $exercises->count();
-
             $completed = 0;
+
             foreach ($exercises as $exercise) {
-                // Attach the latest answer for this exercise (if any)
+                // Attach latest answer for this exercise (if any)
                 $exercise->student_answer = $answers->get($exercise->id);
 
                 // Mark as completed if the answer exists and is STATUS_3
@@ -59,7 +64,7 @@ class StudentDashboardController extends Controller
 
         // how many total vs. completed (status === Answer::STATUS_3)
         $totalAll     = $allExercises->count();
-        $completedAll = $allExercises->where('is_completed', true)->count();
+        $completedAll = $allExercises->where('Completed - Submitted Feedback', true)->count();
 
         // overall percent (0-100)
         $overall = $totalAll

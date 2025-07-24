@@ -28,33 +28,13 @@
                     </svg>
                     <span>Exercise</span>
                 </a>
-                <!-- Leaderboard Dropdown Start -->
-                <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" type="button"
-                        class="flex items-center w-full space-x-3 hover:bg-[#142755bb] p-2 rounded focus:outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4m-7-9a7 7 0 0014 0V4H5v4z" />
+                <a href="{{ url('/student/leaderboard/personal') }}" class="flex items-center space-x-3 hover:bg-[#142755bb] p-2 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4m-7-9a7 7 0 0014 0V4H5v4z" />
                         </svg>
-                        <span>Leaderboard</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div x-show="open" @click.away="open = false"
-                        class="absolute left-0 mt-1 w-48 bg-gray rounded shadow-lg z-30"
-                        x-transition>
-                        <a href="{{ url('/student/leaderboard/personal') }}"
-                        class="block px-4 py-2 text-gray-800 hover:bg-[#f0ecff] rounded-t">
-                            Personal Leaderboard
-                        </a>
-                        <a href="{{ url('/student/leaderboard/overall') }}"
-                        class="block px-4 py-2 text-gray-800 hover:bg-[#f0ecff] rounded-b">
-                            Overall Leaderboard
-                        </a>
-                    </div>
-
-                </div>
-                <!-- Leaderboard Dropdown End -->
+                    <span>Personal Leaderboard</span>
+                </a>
+                
             </nav>
     </aside>
 
@@ -200,40 +180,40 @@
                 </button>
 
                 @foreach($topic->exercises as $exercise)
-                   @php
-        $ans       = $exercise->answers->first();
-        $status    = $ans?->status   ?? 'Not Started';
-        $feedback  = $ans?->feedback ?? null;
-      @endphp
+                    @php
+                        $ans       = $exercise->answers->first();
+                        $status    = $ans?->status   ?? 'Not Started';
+                        $feedback  = $ans?->feedback ?? null;
+                    @endphp
 
-      <div class="exercise-row bg-[#111d33] p-4 rounded-lg neon-label flex items-start justify-between mb-3">
-        <div class="flex flex-col">
-          {{-- Line 1: Title --}}
-          <div class="font-bold text-[#15f7fc]">
-            {{ $exercise->exercise_title }}
-          </div>
+                    <div class="exercise-row bg-[#111d33] p-4 rounded-lg neon-label flex items-start justify-between mb-3">
+                        <div class="flex flex-col">
+                        {{-- Line 1: Title --}}
+                        <div class="font-bold text-[#15f7fc]">
+                            {{ $exercise->exercise_title }}
+                        </div>
 
-          {{-- Line 2: Status --}}
-          <div class="text-sm text-[#13e2be] mt-1">
-            STATUS: {{ $status }}
-          </div>
+                        {{-- Line 2: Status --}}
+                        <div class="text-sm text-[#13e2be] mt-1">
+                            STATUS: {{ $status }}
+                        </div>
 
-          {{-- Line 3: Feedback (only if present) --}}
-          @if($feedback)
-            <div class="text-sm text-[#13e2be] mt-1">
-              {{ $feedback }}
-            </div>
-          @endif
-        </div>
+                        {{-- Line 3: Feedback (only if present) --}}
+                        @if($feedback)
+                            <div class="text-sm text-[#13e2be] mt-1">
+                            {{ $feedback }}
+                            </div>
+                        @endif
+                        </div>
 
-        {{-- Leaderboard button stays to the right --}}
-        <a
-          href="{{ route('leaderboard.overall', [$exercise->id, auth()->id()]) }}"
-          class="view-leaderboard-btn ml-4 self-center"
-        >
-          LEADERBOARD
-        </a>
-      </div>
+                        {{-- Leaderboard button stays to the right --}}
+                        <a
+                        href="{{ route('leaderboardOverall', [$exercise->id, auth()->id()]) }}"
+                        class="view-leaderboard-btn ml-4 self-center"
+                        >
+                        LEADERBOARD
+                        </a>
+                    </div>
                 @endforeach
 
                 </div>

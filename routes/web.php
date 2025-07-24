@@ -14,6 +14,7 @@ use App\Http\Controllers\CppCompilerController;
 use App\Http\Controllers\LecturerCourseController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Models\CourseEnrollment;
+use App\Http\Controllers\StudentLeaderboardController;
 
 Route::get('/forgottt-password', function () {
         return view('forgottt-password'); // ensure this matches your blade filename/casing
@@ -175,6 +176,18 @@ Route::middleware(['auth'])->group(function () {
     // Update profile (name, email, avatar, etc.)
     Route::put('/profile', [ProfileController::class, 'update'])
          ->name('profile.update');
+
+    // View student leaderboard (personal)
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/student/leaderboard/personal', [StudentLeaderboardController::class, 'personal'])->name('leaderboardPersonal');
+    });
+
+   Route::get('/student/leaderboard/overall/{exerciseId}', [StudentLeaderboardController::class, 'overall'])
+    ->name('leaderboardOverall')
+    ->middleware('auth');
+
+
+
 
     // //lecturer view profile (UI)
     // Route::get('/lecturer/profilee', function () {

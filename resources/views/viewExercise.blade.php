@@ -53,7 +53,6 @@
                             Overall Leaderboard
                         </a>
                     </div>
-
                 </div>
                 <!-- Leaderboard Dropdown End -->
             </nav>
@@ -92,15 +91,18 @@
             <h2 class="text-3xl text-white font-extrabold mb-8">Exercise</h2>
             <div class="w-full overflow-x-auto">
                 <div class="flex gap-10 pb-12 min-w-[850px]">
-                    @foreach ($topics as $topic)
+                    @forelse ($topics as $topic)
                         <div class="flex flex-col items-center">
                             <!-- Neon Large Card -->
                             <div class="neon-card w-[340px] h-[430px] flex flex-col justify-between px-6 py-7 mb-4 shadow-2xl">
                                 <div>
                                     <h3 class="text-2xl font-bold mb-4 text-[#15f7fc]">{{ $topic->topic_title }}</h3>
                                     <div class="overflow-y-auto max-h-[280px] pr-1 custom-scroll">
-                                        @foreach ($topic->exercises as $exercise)
-                                            @php $answer = optional($exercise->answers)->first(); @endphp
+                                        @forelse ($topic->exercises as $exercise)
+                                            @php
+                                                // Get answer for current student (if eager loaded, else fallback)
+                                                $answer = $exercise->answers->where('student_id', auth()->id())->first() ?? null;
+                                            @endphp
                                             <div class="bg-[#071c2d] text-white mb-3 rounded-lg px-3 py-2 border border-[#15f7fc44]">
                                                 <div class="font-semibold text-[#15f7fc]">{{ $exercise->exercise_title }}</div>
                                                 <div class="text-sm mt-1">Status:
@@ -113,7 +115,9 @@
                                                     Answer
                                                 </a>
                                             </div>
-                                        @endforeach
+                                        @empty
+                                            <div class="text-gray-400 italic mt-4">No exercises for your group in this topic.</div>
+                                        @endforelse
                                     </div>
                                 </div>
                             </div>
@@ -122,11 +126,12 @@
                                 {{ 'Topic ' . $loop->iteration }}
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <div class="text-white">No topics available for your group.</div>
+                    @endforelse
                 </div>
             </div>
         </main>
-
     </div>
 
     <style>
@@ -146,7 +151,6 @@
             0 0 80px 4px #15f7fc55 inset;
         border-color: #13e2be;
     }
-
     .neon-label {
         background: rgba(8, 15, 35, 0.97);
         border: 3px solid #15f7fc;
@@ -164,8 +168,6 @@
         background: #13e2be44;
         border-radius: 6px;
     }
-
-
     .neon-frame {
         background: rgba(10, 10, 30, 0.90);
         border: 3px solid #15f7fc;
@@ -242,10 +244,4 @@
         background: #050e1a;
     }
     </style>
-    <script>
-        function toggleExercises(topic_id) {
-            const div = document.getElementById('exercises-' + topic_id);
-            div.style.display = div.style.display === 'none' ? 'block' : 'none';
-        }
-    </script>
 </x-app-layout>

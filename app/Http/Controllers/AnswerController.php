@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Topic;
+
 use App\Models\Answer;
 use App\Models\Exercise;
-use App\Models\StepAnswer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use App\Models\Topic;
 
 class AnswerController extends Controller
 {
-
-
-
     // for lecturer page: view student answer
     public function studentAnswer($exerciseId, $groupId)
     {
@@ -42,19 +39,41 @@ class AnswerController extends Controller
     //student view list of exercise
     public function index()
     {
-        $topics = Topic::with(['exercises.answers' => function ($query) {
-            $query->where('student_id', auth()->id());
-        }])->get();
+        $studentId = auth()->id();
+        $enrollment = \App\Models\CourseEnrollment::where('student_id', $studentId)->first();
+        $lecturerId  = $enrollment?->lecturer_id ?? null;
+        $groupCourse = $enrollment?->groupCourse ?? null;
+        $courseId    = $enrollment?->course_id ?? null;
+
+        // Only show topics for this course
+         $topics = \App\Models\Topic::where('course_id', $courseId)
+            ->with(['exercises' => function($q) use ($groupCourse, $lecturerId) {
+                // Only exercises created for THIS class (groupCourse) by THIS lecturer
+                $q->where('groupCourse', $groupCourse)
+                ->where('lecturer_id', $lecturerId);
+            }])
+            ->orderBy('id')
+            ->get();
+
 
         return view('viewExercise', compact('topics'));
     }
+
 
     //for student page: view exercise answer
     public function show(Exercise $exercise, Request $request)
     {
         $exercise->load('guidelines');
 
+        // In show(Exercise $exercise, Request $request)
         $studentId = $request->input('student_id', auth()->id());
+        $enrollment = \App\Models\CourseEnrollment::where('student_id', $studentId)->first();
+        $groupCourse = $enrollment?->groupCourse ?? null;
+
+        if ($exercise->groupCourse !== $groupCourse) {
+            abort(403, "You are not allowed to access this exercise.");
+        }
+
         //dd($studentId);
 
         // find any existing record (just to maybe preload)
@@ -77,21 +96,45 @@ class AnswerController extends Controller
             ->where('status', operator: Answer::STATUS_3)
             ->first();
         //dd($existingAnswer->status);
-        return view('takeExercise', compact('exercise', 'submittedFeedback','existingAnswer', 'submittedGuideline', 'submittedCode', 'studentId'));
+        return view('takeExercise', compact('exercise', 'submittedFeedback', 'existingAnswer', 'submittedGuideline', 'submittedCode', 'studentId'));
     }
 
-    //for student page: submit exercise
+
+
     public function submitFinalExercise(Request $request, Exercise $exercise)
     {
-        $category = $request->input('category');
+           //     dd($request->all());
 
+        // 1) Validate the incoming timing fields
+        $data = $request->validate([
+            'category'      => 'required|string',
+            'start_time'    => 'required|date_format:Y-m-d H:i:s',
+            'end_time'      => 'required|date_format:Y-m-d H:i:s',
+            'elapsed_time'  => 'required|integer',
+        ]);
+
+        // 2) Calculate your score
+        $rawScore   = $exercise->score ?? 0;
+        $elapsed    = $data['elapsed_time'];
+        $finalScore = ($elapsed <= 600) ? ($rawScore * 2) : $rawScore;
+
+        // 3) Update the answer record
         Answer::where('student_id', auth()->id())
             ->where('exercise_id', $exercise->id)
-            ->where('category', $category)
-            ->update(['status' => Answer::STATUS_2]);
+            ->where('category', $data['category'])
+            ->update([
+                'status'        => Answer::STATUS_2,
+                'student_score' => $finalScore,
+                'start_time'    => Carbon::parse($data['start_time'])->toDateTimeString(),
+                'end_time'      => Carbon::parse($data['end_time'])->toDateTimeString(),
+                'elapsed_time'  => $elapsed,
+            ]);
 
-        return redirect()->route('answer.show', ['exercise' => $exercise->id])
-            ->with('info', 'Your compiler answer has been submitted!');
+        // 4) Redirect back
+        return redirect()
+            ->route('answer.show', ['exercise' => $exercise->id])
+            ->with('info', 'Your compiler answer has been submitted!'
+                . ($elapsed <= 600 ? ' 🎉 Double Score Awarded!' : ''));
     }
 
     //for student page: submit exercise
@@ -258,5 +301,4 @@ class AnswerController extends Controller
         // return back()->with('success', 'Successfully saved feedback and scores for student');
 
     }
-    
 }

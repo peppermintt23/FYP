@@ -13,11 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('topics', function (Blueprint $table) {
-            $table->id();
-            $table->string('topic_title');
-            $table->timestamps();
-            
+        Schema::table('answers', function (Blueprint $table) {
+            $table->timestamp('elapsed_time')->nullable()->after('end_time');
         });
     }
 
@@ -28,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('topics');
+        Schema::table('answers', function (Blueprint $table) {
+             $table->dropColumn('elapsed_time');
+        });
     }
 };

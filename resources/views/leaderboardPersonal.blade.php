@@ -28,32 +28,12 @@
                 </svg>
                 <span>Exercise</span>
             </a>
-            <!-- Leaderboard Dropdown Start -->
-            <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open" type="button"
-                    class="flex items-center w-full space-x-3 hover:bg-[#142755bb] p-2 rounded focus:outline-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4m-7-9a7 7 0 0014 0V4H5v4z" />
+            <a href="#" class="flex items-center space-x-3 hover:bg-[#142755bb] p-2 rounded">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4m-7-9a7 7 0 0014 0V4H5v4z" />
                     </svg>
-                    <span>Leaderboard</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div x-show="open" @click.away="open = false"
-                    class="absolute left-0 mt-1 w-48 bg-white rounded shadow-lg z-30"
-                    x-transition>
-                    <a href="{{ url('/student/leaderboard/personal') }}"
-                    class="block px-4 py-2 text-gray-800 hover:bg-[#f0ecff] rounded-t font-semibold text-sm">
-                        Personal Leaderboard
-                    </a>
-                    <a href="{{ url('/student/leaderboard/overall') }}"
-                    class="block px-4 py-2 text-gray-800 hover:bg-[#f0ecff] rounded-b font-semibold text-sm">
-                        Overall Leaderboard
-                    </a>
-                </div>
-            </div>
-            <!-- Leaderboard Dropdown End -->
+                <span>Personal Leaderboard</span>
+            </a>
         </nav>
     </aside>
 
@@ -69,8 +49,8 @@
             <div x-show="open" @click.away="open = false" x-transition
                  class="absolute right-0 mt-2 w-48 bg-white border rounded shadow-md divide-y divide-gray-200 z-50">
                 <div class="py-1">
-                    <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        Profile
+                    <a href="{{ url('/student/profile/') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            Profile
                     </a>
                 </div>
                 <div class="py-1">
@@ -93,55 +73,85 @@
             <!-- Centered Profile -->
             <div class="flex flex-col items-center justify-center mb-10">
                 <div class="w-28 h-28 rounded-full border-4 border-[#15f7fc] flex items-center justify-center shadow-xl bg-[#061928] mb-3">
-                    <img src="{{ asset('asset/A_Fiona.png') }}" alt="avatar" class="w-20 h-20 rounded-full">
+                    <img id="student-avatar" 
+                        src="{{ asset('asset/avatars/' . (Auth::user()->avatar ?? 'default-avatar.png')) }}"
+                        alt="Avatar"
+                        class="w-20 h-20 rounded-full border-2"
+                    />
+
                 </div>
                 <div class="mt-2 flex flex-col items-center">
-                    <span class="font-extrabold text-2xl text-white leading-tight">Aina</span>
-                    <span class="font-bold text-xl mt-2 text-[#15f7fc] tracking-widest">SCORE : <span class="text-white">94</span></span>
+                    <span id="student-name" class="font-extrabold text-2xl text-white leading-tight">{{ Auth::user()->name }}</span>
+                    <span id="total-point" class="font-bold text-xl mt-2 text-[#15f7fc] tracking-widest">POINT : <span class="text-white">{{ $totalPoints }}</span></span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                <!-- Topic 1 -->
-                <div class="bg-[#061928dd] border-2 border-[#15f7fc66] rounded-2xl p-5 shadow-lg neon-inner">
-                    <h3 class="font-bold text-[#15f7fc] text-lg mb-3 tracking-widest">TOPIC 1</h3>
-                    <div class="flex justify-between text-[#b3f3f8] text-base mb-2">
-                        <span>Exercise 1:</span> <span>15</span>
-                    </div>
-                    <div class="flex justify-between text-[#b3f3f8] text-base">
-                        <span>Exercise 2:</span> <span>19</span>
-                    </div>
+            <div class="w-full overflow-x-auto">
+                <div id="topics-wrapper" class="flex space-x-6 min-w-max">
+                    @foreach ($topics as $topic)
+                        <div class="bg-[#061928dd] border-2 border-[#15f7fc66] rounded-2xl p-5 shadow-lg neon-inner h-64 w-72 flex-shrink-0 overflow-y-auto scrollbar-thin scrollbar-thumb-[#15f7fc33]">
+                            <h3 class="font-bold text-[#15f7fc] text-lg mb-3 tracking-widest">TOPIC {{ $loop->iteration }}</h3>
+                            @foreach ($topic->exercises as $exercise)
+                                @php
+                                    $exerciseAnswer = $answers[$exercise->id] ?? null;
+                                    $points = $exerciseAnswer?->student_score ?? 0;
+                                    $elapsed = $exerciseAnswer?->elapsed_time ?? 0;
+                                    $h = floor($elapsed / 3600);
+                                    $m = floor(($elapsed % 3600) / 60);
+                                    $s = $elapsed % 60;
+                                    $timeStr = sprintf('%02d:%02d:%02d', $h, $m, $s);
+                                @endphp
+                                <div class="flex justify-between text-[#b3f3f8] text-base mb-2">
+                                    <span>
+                                        {{ $exercise->exercise_title }}:
+                                    </span>
+                                    <span>
+                                        {{ $points }} <span class="text-xs text-[#15f7fc99]">({{ $timeStr }})</span>
+                                    </span>
+                                </div>
+                            @endforeach
+
+                        </div>
+                    @endforeach
                 </div>
-                <!-- Topic 2 -->
-                <div class="bg-[#061928dd] border-2 border-[#15f7fc66] rounded-2xl p-5 shadow-lg neon-inner">
-                    <h3 class="font-bold text-[#15f7fc] text-lg mb-3 tracking-widest">TOPIC 2</h3>
-                    <div class="flex justify-between text-[#b3f3f8] text-base mb-2">
-                        <span>Exercise 1:</span> <span>20</span>
-                    </div>
-                    <div class="flex justify-between text-[#b3f3f8] text-base">
-                        <span>Exercise 2:</span> <span>40</span>
-                    </div>
-                </div>
-                <!-- Topic 3 -->
-                <div class="bg-[#061928dd] border-2 border-[#15f7fc66] rounded-2xl p-5 shadow-lg neon-inner">
-                    <h3 class="font-bold text-[#15f7fc] text-lg mb-3 tracking-widest">TOPIC 3</h3>
-                    <div class="flex justify-between text-[#b3f3f8] text-base mb-2">
-                        <span>Exercise 1:</span> <span>20</span>
-                    </div>
-                    <div class="flex justify-between text-[#b3f3f8] text-base">
-                        <span>Exercise 2:</span> <span>40</span>
-                    </div>
-                     <div class="flex justify-between text-[#b3f3f8] text-base">
-                        <span>Exercise 3:</span> <span></span>
-                    </div>
-                     <div class="flex justify-between text-[#b3f3f8] text-base">
-                        <span>Exercise 4:</span> <span></span>
-                    </div>
-                </div>
+            </div>
+
             </div>
         </div>
     </main>
 </div>
+
+<script>
+        setInterval(function() {
+        fetch("{{ route('student.leaderboard.personal.data') }}")
+            .then(response => response.json())
+            .then(data => {
+                // Update total points
+                document.getElementById('total-point').innerText = data.totalPoints;
+                // Update name and avatar if needed
+                document.getElementById('student-name').innerText = data.name;
+                document.getElementById('student-avatar').src = `/asset/avatars/${data.avatar ?? 'default-avatar.png'}`;
+                // Update topics & exercises
+                let topicWrap = document.getElementById('topics-wrapper');
+                topicWrap.innerHTML = ''; // clear old content
+
+                data.topics.forEach(function(topic, tIdx) {
+                    let topicBox = document.createElement('div');
+                    topicBox.className = "bg-[#061928dd] border-2 border-[#15f7fc66] rounded-2xl p-5 shadow-lg neon-inner h-64 w-72 flex-shrink-0 overflow-y-auto scrollbar-thin scrollbar-thumb-[#15f7fc33]";
+                    let html = `<h3 class="font-bold text-[#15f7fc] text-lg mb-3 tracking-widest">TOPIC ${tIdx + 1}</h3>`;
+                    topic.exercises.forEach(function(ex, eIdx) {
+                        let point = data.answers[ex.id]?.student_score ?? '0';
+                        html += `<div class="flex justify-between text-[#b3f3f8] text-base mb-2">
+                                    <span>${ex.exercise_title}:</span>
+                                    <span>${point}</span>
+                                </div>`;
+                    });
+                    topicBox.innerHTML = html;
+                    topicWrap.appendChild(topicBox);
+                });
+            });
+    }, 5000); // every 5 seconds
+</script>
 
 <style>
 .neon-frame {
@@ -205,5 +215,16 @@ header .font-semibold {
 body, .min-h-screen {
     background: #050e1a;
 }
+
+/* For webkit browsers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #15f7fc33;
+  border-radius: 4px;
+}
+
 </style>
 </x-app-layout>

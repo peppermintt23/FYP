@@ -13,21 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('topics', function (Blueprint $table) {
-            $table->id();
-            $table->string('topic_title');
-            $table->timestamps();
-            
+        Schema::table('answers', function (Blueprint $table) {
+            $table->integer('elapsed_time')->nullable()->change();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
-        Schema::dropIfExists('topics');
+        Schema::table('answers', function (Blueprint $table) {
+            $table->timestamp('elapsed_time')->nullable()->change();
+        });
     }
+
 };

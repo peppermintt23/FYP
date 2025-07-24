@@ -3,6 +3,11 @@
 @endphp
 <x-app-layout>
     <div class="min-h-screen w-full bg-[#050e1a] text-gray-900">
+        <div
+            x-data="timerComponent({{ $existingAnswer?->status ?? \App\Models\Answer::STATUS_1 }})"
+            x-init="init()"
+            class="min-h-screen w-full bg-[#050e1a] text-gray-900"
+        >
         <!-- Top Header/Profile Bar (Neon) -->
         <header class="fixed top-0 left-0 right-0 h-16 bg-[#071c2d] shadow flex justify-end items-center px-8 z-40">
             <div class="relative" x-data="{ open: false }">
@@ -15,8 +20,9 @@
                 <div x-show="open" @click.away="open = false" x-transition
                     class="absolute right-0 mt-2 w-48 bg-white border rounded shadow-md divide-y divide-gray-200 z-50">
                     <div class="py-1">
-                        <a href="{{ route('profile.edit') }}"
-                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                        <a href="{{ url('/student/profile/') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            Profile
+                        </a>
                     </div>
                     <div class="py-1">
                         <form method="POST" action="{{ route('logout') }}">
@@ -57,33 +63,15 @@
                         </svg>
                         <span>Exercise</span>
                     </a>
-                     <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" type="button"
-                            class="flex items-center w-full space-x-3 hover:bg-[#142755bb] p-2 rounded focus:outline-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4m-7-9a7 7 0 0014 0V4H5v4z" />
-                            </svg>
-                            <span>Leaderboard</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        <div x-show="open" @click.away="open = false"
-                            class="absolute left-0 mt-1 w-48 bg-gray rounded shadow-lg z-30"
-                            x-transition>
-                            <a href="{{ url('/student/leaderboard/personal') }}"
-                            class="block px-4 py-2 text-gray-800 hover:bg-[#f0ecff] rounded-t">
-                                Personal Leaderboard
-                            </a>
-                            <a href="{{ url('/student/leaderboard/overall') }}"
-                            class="block px-4 py-2 text-gray-800 hover:bg-[#f0ecff] rounded-b">
-                                Overall Leaderboard
-                            </a>
-                        </div>
-
-                    </div>
+                     <a href="{{ url('/student/leaderboard/personal') }}" class="flex items-center space-x-3 hover:bg-[#142755bb] p-2 rounded">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4m-7-9a7 7 0 0014 0V4H5v4z" />
+                        </svg>
+                        <span>Personal Leaderboard</span>
+                    </a>
                 </nav>
             </aside>
+
         @elseif(Auth::check() && Auth::user()->role == 'lecturer')
             <!-- Sidebar -->
             <aside class="fixed left-0 top-0 h-screen w-64 text-white p-6 z-50">
@@ -137,22 +125,36 @@
             </aside>
         @endif
         <!-- Main Content -->
-        <main class="ml-55 mt-20 p-8 min-h-screen bg-transparent flex flex-col items-start justify-center">
-            <!-- Stopwatch (UI Only) -->
-                    <div id="stopwatch"
-                        class="fixed top-20 right-6 flex items-center bg-[#050e1ae0] px-4 py-2 rounded-xl shadow-[0_0_12px_#15f7fc88] border border-[#13e2be] z-10"
-                        style="font-family: 'Fira Mono', monospace; color: #19ffe7; font-size: 1.13rem; letter-spacing: 2px;">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#19ffe7" stroke-width="2" viewBox="0 0 24 24">
+        <main class="ml-55 mt-20 p-8 min-h-screen bg-transparent flex justify-center">
+            
+            <div class="w-full max-w-4xl mx-auto flex flex-col gap-6">
+            <!-- Stopwatch -->
+                @if (!$existingAnswer || $existingAnswer->status == Answer::STATUS_1)
+                <div
+                    id="stopwatch"
+                    class="fixed top-20 right-6 flex items-center justify-between bg-[#050e1ae0] px-4 py-2 rounded-xl shadow-[0_0_12px_#15f7fc88] border border-[#13e2be] z-50"
+                    style="font-family: 'Fira Mono', monospace; color: #19ffe7; font-size: 1.13rem; letter-spacing: 2px; width: max-content;"
+                >
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="#19ffe7" stroke-width="2" viewBox="0 0 24 24">
                             <circle cx="12" cy="13" r="8" stroke="#19ffe7"/>
                             <path d="M12 9v4l3 2" stroke="#19ffe7" stroke-linecap="round"/>
                             <path d="M9 2h6" stroke="#19ffe7" stroke-linecap="round"/>
                         </svg>
-                        <span id="timer">00:00:19</span>
+                        <span id="timer">00:00:00</span>
                     </div>
-            <div class="w-full max-w-4xl  p-8 mt-10 mx-auto">
+
+                    <a
+                        href="{{ route('answer.index') }}"
+                        class="ml-4 text-[#15f7fc] bg-[#071c2d] border-2 border-cyan-400 hover:bg-[#0a2239] hover:text-white px-2 py-1 rounded-full shadow transition duration-150 flex items-center justify-center"
+                        style="line-height: 1;"
+                    >&times;</a>
+                </div>
+                @endif
+
 
                 <!-- Question Section -->
-                <div class="mb-6 bg-gray-700/80 rounded-lg shadow-lg p-8 relative">
+                <div class="bg-gray-700/80 rounded-lg shadow-lg p-8">
                     <h2 class="text-2xl font-bold text-white mb-4">Exercise: {{ $exercise->exercise_title }}</h2>
                     <p class="mb-4  text-white"><strong>Question:</strong> {{ $exercise->question }}</p>
                 </div>
@@ -231,11 +233,13 @@
                                 </span><br>
                                 {{-- Score is probably not set until submission is finalized --}}
                             </p>
-                            <form action="{{ route('answer.submitFinalExercise', $exercise->id) }}" method="POST">
+                            <form
+                                action="{{ route('answer.submitFinalExercise', $exercise->id) }}" 
+                                method="POST"
+                            >
                                 @csrf
                                 <input type="hidden" name="category" value="Need-Compiler" />
-                                <button type="submit" class="mt-4 bg-blue-500 px-4 py-2 rounded text-white">Submit
-                                    Answer</button>
+                                <button type="submit" class="mt-4 bg-blue-500 px-4 py-2 rounded text-white">Submit Answer</button>
                             </form>
 
                             {{-- lepas submit code --}}
@@ -258,7 +262,7 @@
                                         <input type="hidden" name="answer_id" value="{{ $submittedCode->id }}">
                                         Feedback : <br>
                                         <textarea style="width:100%;height:130px;" name="feedback" required></textarea><br>
-                                        Latest Score :
+                                        Latest Point :
                                         <input type="number" name="score"
                                             value="{{ $submittedCode->student_score ?? 0 }}" min="0"
                                             max="20" required />
@@ -270,7 +274,7 @@
                                 @elseif($submittedFeedback && $submittedFeedback->status == Answer::STATUS_3)
                                     <div class="mb-2">
                                         <strong>Lecturer Feedback:</strong> {{ $submittedFeedback->feedback }}<br>
-                                        <strong>Latest Score:</strong> {{ $submittedFeedback->student_score }}
+                                        <strong>Latest Point:</strong> {{ $submittedFeedback->student_score }}
                                     </div>
                                 @endif
 
@@ -301,7 +305,7 @@
 
                         @foreach ($exercise->guidelines as $index => $guideline)
                             @php
-                                $guidelineAnswer = \App\Models\Answer::where('student_id', $studentId)
+                                $guidelineAnswer = Answer::where('student_id', $studentId)
                                     ->where('exercise_id', $exercise->id)
                                     ->where('step_number', $guideline->step_number)
                                     ->where('category', 'Non-Compiler')
@@ -330,7 +334,7 @@
 
                         <!-- Compiler-based answer: show code run form -->
                         @php
-                            $existing = \App\Models\Answer::where('student_id', $studentId)
+                            $existing = Answer::where('student_id', $studentId)
                                 ->where('exercise_id', $exercise->id)
                                 ->where('category', 'Need-Compiler')
                                 ->first();
@@ -345,8 +349,7 @@
                                 <label class="block mt-4 mb-2 font-semibold">Your Code:</label>
                                 <textarea name="code" rows="10" class="w-full p-2 bg-white text-black rounded" required>{{ $studentCode }}</textarea>
 
-                                <button type="submit" class="mt-4 bg-blue-500 px-4 py-2 rounded text-white">Run
-                                    Code</button>
+                                <button type="submit" class="mt-4 bg-blue-500 px-4 py-2 rounded text-white">Run Code</button>
                             </form>
                         @endif
 
@@ -371,13 +374,21 @@
                                 <span class="{{ $isPass ? 'text-green-600' : 'text-red-600' }}">
                                     {{ $isPass ? '✅ Pass, Congrats!' : '❌ Not Pass, Please Check your code again!' }}
                                 </span><br>
-                                <span>Score : {{ $existing?->student_score }}/20</span>
+                                <span>Point : {{ $existing?->student_score }} pt</span>
                             </p>
-                            <form action="{{ route('answer.submitFinalExercise', $exercise->id) }}" method="POST">
+                            <form 
+                                id="final-answer-form" 
+                                action="{{ route('answer.submitFinalExercise', $exercise->id) }}" 
+                                method="POST"
+                            
+                            >
                                 @csrf
                                 <input type="hidden" name="category" value="Need-Compiler" />
-                                <button type="submit" class="mt-4 bg-blue-500 px-4 py-2 rounded text-white">Submit
-                                    Answer</button>
+                                <input type="hidden" name="start_time"   x-model="startISO">
+                                <input type="hidden" name="end_time"     x-model="endISO">
+                                <input type="hidden" name="elapsed_time" x-model="elapsedSeconds">
+                                
+                                <button type="submit" class="mt-4 bg-blue-500 px-4 py-2 rounded text-white">Submit Answer</button>
                             </form>
                             {{-- lepas submit code --}}
                         @elseif(
@@ -403,7 +414,7 @@
                             </div>
 
                             <p class="text-white mt-2 font-semibold">
-                                Result #<span>Score : {{ $existing?->student_score ?? 0 }}/20</span>
+                                Result #<span>Point : {{ $existing?->student_score ?? 0 }} pt</span>
                             </p>
                             <br>
                             @if ($submittedCode && $submittedCode->status == Answer::STATUS_2 && Auth::user()->role == 'lecturer')
@@ -424,7 +435,7 @@
                                     <input type="hidden" name="answer_id" value="{{ $submittedCode->id }}">
                                     <p class="text-white">Feedback:</p> <br>
                                     <textarea style="width:100%;height:130px;" name="feedback" required></textarea><br>
-                                    <p class="text-white">Latest Score :</p>
+                                    <p class="text-white">Latest Point :</p>
                                     <input type="number" name="score"
                                         value="{{ $submittedCode->student_score ?? 0 }}" min="0"
                                         max="20" required />
@@ -441,7 +452,7 @@
                                     <strong class="text-blue-300"> {{ $submittedFeedback->feedback }} </strong> <br>
 
                                     <strong class="text-white">
-                                        Latest Score:
+                                        Latest Point:
                                     </strong> 
                                     <strong class="text-blue-300"> {{ $submittedFeedback->student_score }} </strong> <br>
                                   
@@ -451,43 +462,91 @@
                     @endif
                 </div>
             </div>
+            </div>
+        </div>
         </main>
     </div>
 
-    <script>
-    let timerInterval;
-    let elapsed = 0;
-    let running = false;
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    @if(!$existingAnswer || $existingAnswer->status == Answer::STATUS_1)
+        // 1) define a storage key that’s unique per exercise
+        const storageKey = 'exercise_{{ $exercise->id }}_start';
 
-    function updateTimer() {
-        let h = Math.floor(elapsed / 3600).toString().padStart(2, '0');
-        let m = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
-        let s = (elapsed % 60).toString().padStart(2, '0');
-        document.getElementById('timer').textContent = `${h}:${m}:${s}`;
-    }
-
-    document.getElementById('startBtn').onclick = function() {
-        if (!running) {
-            running = true;
-            timerInterval = setInterval(() => {
-                elapsed++;
-                updateTimer();
-            }, 1000);
+        // 2) load or init the startTime
+        let startTime = localStorage.getItem(storageKey);
+        if (startTime) {
+            startTime = parseInt(startTime, 10);
+        } else {
+            startTime = Date.now();
+            localStorage.setItem(storageKey, startTime);
         }
-    };
-    document.getElementById('pauseBtn').onclick = function() {
-        running = false;
-        clearInterval(timerInterval);
-    };
-    document.getElementById('resetBtn').onclick = function() {
-        running = false;
-        clearInterval(timerInterval);
-        elapsed = 0;
+
+        // 3) grab the timer display & start ticking
+        const timerDisplay = document.getElementById('timer');
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+            const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+            const s = String(elapsed % 60).padStart(2, '0');
+            timerDisplay.textContent = `${h}:${m}:${s}`;
+        }
         updateTimer();
-    };
-    // Init display
-    updateTimer();
+        const interval = setInterval(updateTimer, 1000);
+
+        // 4) wire up the form
+        const finalForm = document.getElementById('final-answer-form');
+        if (finalForm) {
+            // remove any old timing fields
+            ['start_time','end_time','elapsed_time'].forEach(name => {
+                const old = finalForm.querySelector(`[name="${name}"]`);
+                if (old) old.remove();
+            });
+
+            // create hidden start_time
+            const hiddenStart = document.createElement('input');
+            hiddenStart.type  = 'hidden';
+            hiddenStart.name  = 'start_time';
+            hiddenStart.value = new Date(startTime)
+                                  .toISOString()
+                                  .slice(0,19)
+                                  .replace('T',' ');
+            finalForm.appendChild(hiddenStart);
+
+            // create hidden end_time
+            const hiddenEnd = document.createElement('input');
+            hiddenEnd.type = 'hidden';
+            hiddenEnd.name = 'end_time';
+            finalForm.appendChild(hiddenEnd);
+
+            // create hidden elapsed_time
+            const hiddenElapsed = document.createElement('input');
+            hiddenElapsed.type = 'hidden';
+            hiddenElapsed.name = 'elapsed_time';
+            finalForm.appendChild(hiddenElapsed);
+
+            // on actual submit…
+            finalForm.addEventListener('submit', () => {
+                const now = Date.now();
+
+                // stamp end and elapsed
+                hiddenEnd.value     = new Date(now)
+                                         .toISOString()
+                                         .slice(0,19)
+                                         .replace('T',' ');
+                hiddenElapsed.value = Math.floor((now - startTime) / 1000);
+
+                // stop ticking
+                clearInterval(interval);
+
+                // 5) clear storage so a new attempt restarts fresh
+                localStorage.removeItem(storageKey);
+            });
+        }
+    @endif
+});
 </script>
+
 
 
 <style>

@@ -132,21 +132,45 @@ class ProfileController extends Controller
         public function viewStudent(Request $request, $courseId)
         {
             $groupCourse = $request->input('groupCourse');
-            
-            $course = Course::with(['students' => function ($query) use ($groupCourse) {
-                if ($groupCourse) {
-                    $query->wherePivot('groupCourse', $groupCourse);
-                }
-            }])->findOrFail($courseId);
 
-            return view('studentList', compact('course', 'groupCourse'));
+            // 1. Find course and eager load students in this groupCourse only
+            $course = Course::findOrFail($courseId);
+
+            $students = $course->students()
+                ->wherePivot('groupCourse', $groupCourse)
+                ->get();
+
+            // 2. If you need to display exercises for this group
+            $topics = Topic::where('course_id', $courseId)->get();
+            $exercisesByTopic = [];
+
+            foreach ($topics as $topic) {
+                $exercises = $topic->exercises()
+                    ->where('groupCourse', $groupCourse)
+                    ->get();
+
+                $exercisesByTopic[$topic->id] = $exercises;
+            }
+
+            // 3. Pass everything to view
+            return view('studentList', [
+                'course'     => $course,
+                'groupCourse'=> $groupCourse,
+                'students'   => $students,
+                'topics'     => $topics,
+                'exercisesByTopic' => $exercisesByTopic,
+            ]);
         }
+
 
 
         public function viewStudentProfile(Request $request): View
         {
             // $user is your User model, with role='student'
             $user = $request->user();
+
+            $enrollment = \App\Models\CourseEnrollment::where('student_id', $user->id)->first();
+            $groupCourse = $enrollment?->groupCourse ?? null;
 
             $avatars = [
                 'A_BMO.png',
@@ -166,9 +190,16 @@ class ProfileController extends Controller
                 'A_Tree_Trunks.png',
             ];
 
-             $topics = Topic::with(['exercises.answers' => function($q) use ($user) {
-                $q->where('student_id', $user->id);
-            }])->get();
+            $topics = Topic::with(['exercises' => function($q) use ($groupCourse) {
+                $q->where('groupCourse', $groupCourse); // Only this group’s exercises
+            }, 'exercises.answers' => function($q) use ($user) {
+                $q->where('student_id', $user->id); // Only this student’s answers
+            }])
+            ->whereHas('exercises', function($q) use ($groupCourse) {
+                $q->where('groupCourse', $groupCourse);
+            })
+            ->get();
+
 
             return view('viewStudentProfile', compact('user', 'avatars', 'topics'));
         }

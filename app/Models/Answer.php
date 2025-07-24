@@ -22,7 +22,10 @@ class Answer extends Model
         'student_score',
         'parent_answer_id',
         'feedback',
-        'status'
+        'status',
+        'start_time',
+        'end_time',
+        'elapsed_time', 
     ];
 
     public function student() {

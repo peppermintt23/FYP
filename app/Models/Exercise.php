@@ -15,7 +15,9 @@ class Exercise extends Model
         'hint', 
         'expected_output', 
         'score', 
-        'has_guideline',  // Make sure this is here
+        'has_guideline',  
+        'groupCourse',         
+        'lecturer_id',    
     ];
 
     public function topic()
@@ -36,6 +38,10 @@ class Exercise extends Model
     public function answers()
     {
         return $this->hasMany(Answer::class);
+    }
+
+    public function lecturer() {
+        return $this->belongsTo(User::class, 'lecturer_id');
     }
 
 }

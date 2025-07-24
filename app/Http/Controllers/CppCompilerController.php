@@ -57,14 +57,19 @@ class CppCompilerController extends Controller
             $expectedOutput = trim($exercise->expected_output);
             $actualOutput = trim($output);
 
-            $student_score = ($expectedOutput === $actualOutput) ? 20 : 10;
+            $isPass = ($actualOutput === $expectedOutput);
+
+            // then:
+            $student_score = $isPass
+                ? $exercise->score  // give full points on a match
+                : 0;                // otherwise zero
 
             $cmp = 'Need-Compiler';
             $existing = Answer::where('student_id', auth()->id())
                 ->where('exercise_id', $exercise_id)
                 ->where('category', $cmp)
                 ->where('step_number', 100) // special marker
-                ->first();  
+                ->first();
 
             if (!$existing) {
                 Answer::create([
@@ -92,7 +97,6 @@ class CppCompilerController extends Controller
                     'old_code' => $code,
                     'old_stdin' => $stdin
                 ]);
-
         } catch (\Exception $e) {
             return back()->with([
                 'compiler_status' => 'Error',

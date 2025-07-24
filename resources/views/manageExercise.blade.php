@@ -58,6 +58,17 @@
         <!-- Main Content Wrapper -->
        <main class="ml-64 pt-24 min-h-screen flex flex-col">
             <div class="w-full max-w-3xl neon-frame p-4 ml-0">
+                @if(session('error'))
+                    <div class="mb-4 p-3 rounded bg-red-600 text-white text-center font-semibold shadow">
+                        {{ session('error') }}
+                    </div>
+                @endif
+                @if(session('success'))
+                    <div class="mb-4 p-3 rounded bg-green-600 text-white text-center font-semibold shadow">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
                 @php
                     $courses = App\Models\Course::all();
                 @endphp
@@ -98,10 +109,11 @@
                             <fieldset class="border border-cyan-700 p-6 bg-[#17223a]s shadow-sm mb-6">
                                 <ul class="space-y-6">
                                     @foreach ($topic->exercises as $exercise)
-                                        <li class="flex flex-col md:flex-row justify-between items-start pb-6">
-                                            <div class="grid grid-cols-1 gap-2">
-                                                
-                                                <p class="text-lg font-semibold text-cyan-200">{{ $exercise->exercise_title }}</p>
+                                        <li class="grid md:grid-cols-2 gap-4 pb-6 items-start">
+                                            <div class="flex flex-col gap-2">
+                                                <p class="text-lg font-semibold text-cyan-200">
+                                                    Exercise {{ $loop->iteration }}: {{ $exercise->exercise_title }}
+                                                </p>
                                                 <span class="flex space-x-3 mt-2">
                                                     <a href="{{ route('exercises.edit', $exercise->id) }}"
                                                         class="neon-btn bg-gradient-to-r from-[#599ebd] to-[#42caff]">
@@ -119,7 +131,7 @@
                                                     </form>
                                                 </span>
                                             </div>
-                                            <div class="w-full md:w-72 mt-6 md:mt-0 border border-cyan-700 p-6 bg-[#0d1626] rounded-xl shadow-sm">
+                                              <div class="w-full md:w-72 border border-cyan-700 p-6 bg-[#0d1626] rounded-xl shadow-sm self-stretch flex flex-col justify-center">
                                                 <h4 class="text-md font-bold mb-2 text-cyan-300">Student answer by group:</h4>
                                                 <div class="grid grid-cols-1 gap-2">
                                                     @php
