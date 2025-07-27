@@ -22,7 +22,7 @@ class DashboardController extends Controller
 
         $selectedGroup = $request->input('groupCourse');
         $selectedTopicId = $request->input('topic');
-        $topics = \App\Models\Topic::all();
+        $topics = Topic::all();
 
         $students = collect();
         $exercises = collect();
@@ -30,20 +30,20 @@ class DashboardController extends Controller
 
         if ($selectedGroup && $selectedTopicId) {
             // Student bawah group
-            $students = \App\Models\CourseEnrollment::with('student')
+            $students = CourseEnrollment::with('student')
                 ->where('groupCourse', $selectedGroup)
                 ->where('lecturer_id', $lecturer->id)
                 ->get()
                 ->pluck('student')
                 ->filter();
 
-            $exercises = \App\Models\Exercise::where('topic_id', $selectedTopicId)->get();
+            $exercises = Exercise::where('topic_id', $selectedTopicId)->get();
 
             // For Chart.js
             foreach ($students as $student) {
                 $exerciseStatuses = [];
                 foreach ($exercises as $exercise) {
-                    $answer = \App\Models\Answer::where('student_id', $student->id)
+                    $answer = Answer::where('student_id', $student->id)
                         ->where('exercise_id', $exercise->id)
                         ->orderByDesc('updated_at')->first();
 

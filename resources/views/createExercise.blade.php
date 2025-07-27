@@ -47,10 +47,7 @@
                 <a href="{{ route('exercises.manage', $topic->id ?? 1) }}" class="sidebar-link">
                     <span>Manage Exercise</span>
                 </a>
-                <a href="{{ route('leaderboard.lecturer') }}" class="sidebar-link">
-                    <span>Leaderboard</span>
-                </a>
-                <a href="#" class="sidebar-link">
+                <a href="{{ route('viewReport') }}" class="sidebar-link">
                     <span>Progress Report</span>
                 </a>
             </nav>

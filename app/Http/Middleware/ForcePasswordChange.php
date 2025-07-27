@@ -17,7 +17,7 @@ class ForcePasswordChange
     public function handle(Request $request, Closure $next)
     {
         if (auth()->check() && auth()->user()->force_password_change) {
-        return redirect()->route('password.change.form');
+        return redirect()->route('forgot-password-form');
         }
         
         return $next($request);

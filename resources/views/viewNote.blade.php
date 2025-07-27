@@ -28,33 +28,12 @@
                     </svg>
                     <span>Exercise</span>
                 </a>
-                <!-- Leaderboard Dropdown Start -->
-                <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" type="button"
-                        class="flex items-center w-full space-x-3 hover:bg-[#142755bb] p-2 rounded focus:outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4m-7-9a7 7 0 0014 0V4H5v4z" />
-                        </svg>
-                        <span>Leaderboard</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div x-show="open" @click.away="open = false"
-                        class="absolute left-0 mt-1 w-48 bg-gray rounded shadow-lg z-30"
-                        x-transition>
-                        <a href="{{ url('/student/leaderboard/personal') }}"
-                        class="block px-4 py-2 text-gray-800 hover:bg-[#f0ecff] rounded-t">
-                            Personal Leaderboard
-                        </a>
-                        <a href="{{ url('/student/leaderboard/overall') }}"
-                        class="block px-4 py-2 text-gray-800 hover:bg-[#f0ecff] rounded-b">
-                            Overall Leaderboard
-                        </a>
-                    </div>
-
-                </div>
-                <!-- Leaderboard Dropdown End -->
+                <a href="{{ url('/student/leaderboard/personal') }}" class="flex items-center space-x-3 hover:bg-[#142755bb] p-2 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4m-7-9a7 7 0 0014 0V4H5v4z" />
+                    </svg>
+                    <span>Personal Leaderboard</span>
+                </a>
 
             </nav>
         </aside>

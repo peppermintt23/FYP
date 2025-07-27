@@ -14,7 +14,7 @@ class TopicController extends Controller
 
     public function store(Request $request) {
         $request->validate(['topic_title' => 'required']);
-        Topic::create(['topic_title' => $request->topic_title]);
+        Topic::create(['topic_title' => $request->input('topic_title')]);
         return redirect()->back()->with('success', 'Topic added.');
     }
 

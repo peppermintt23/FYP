@@ -18,7 +18,7 @@
         <div class="min-h-screen flex flex-col justify-center items-center pt-6 sm:pt-0 bg-[#050e1a]">
             <!--box-->
             <div class="bg-[#101b2a] neon-frame w-full max-w-md mx-auto p-10 rounded-2xl shadow-lg">
-                {{ $slot }}
+               @yield('content')
             </div>
         </div>
 

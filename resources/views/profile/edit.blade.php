@@ -1,5 +1,5 @@
 <x-app-layout>
-    <a href="{{ route('student-dashboard') }}"
+    <a href="{{ route('student.profile', $user->id) }}"
         class="absolute top-4 right-4 text-cyan-300 bg-[#0a132a] hover:bg-[#13e2be] hover:text-white px-4 py-2 rounded-lg shadow transition duration-150 z-50 border border-[#13e2be]">
         &times;
     </a>
@@ -18,16 +18,16 @@
                 </div>
             </div>
 
-            <div class="p-8 neon-frame shadow rounded-xl">
+            {{-- <div class="p-8 neon-frame shadow rounded-xl">
                 <div class="max-w-xl">
                     @include('profile.partials.delete-user-form')
                 </div>
-            </div>
+            </div> --}}
         </div>
     </div>
 
     <style>
-        html, body {
+    html, body {
         background: #050e1a !important;
         min-height: 100vh;
         width: 100vw;

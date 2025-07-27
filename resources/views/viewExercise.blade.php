@@ -29,32 +29,12 @@
                     </svg>
                     <span>Exercise</span>
                 </a>
-                <!-- Leaderboard Dropdown Start -->
-                <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" type="button"
-                        class="flex items-center w-full space-x-3 hover:bg-[#142755bb] p-2 rounded focus:outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4m-7-9a7 7 0 0014 0V4H5v4z" />
-                        </svg>
-                        <span>Leaderboard</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div x-show="open" @click.away="open = false"
-                        class="absolute left-0 mt-1 w-48 bg-gray rounded shadow-lg z-30"
-                        x-transition>
-                        <a href="{{ url('/student/leaderboard/personal') }}"
-                        class="block px-4 py-2 text-gray-800 hover:bg-[#f0ecff] rounded-t">
-                            Personal Leaderboard
-                        </a>
-                        <a href="{{ url('/student/leaderboard/overall') }}"
-                        class="block px-4 py-2 text-gray-800 hover:bg-[#f0ecff] rounded-b">
-                            Overall Leaderboard
-                        </a>
-                    </div>
-                </div>
-                <!-- Leaderboard Dropdown End -->
+                <a href="{{ url('/student/leaderboard/personal') }}" class="flex items-center space-x-3 hover:bg-[#142755bb] p-2 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4m-7-9a7 7 0 0014 0V4H5v4z" />
+                    </svg>
+                    <span>Personal Leaderboard</span>
+                </a>
             </nav>
         </aside>
 
@@ -91,20 +71,17 @@
             <h2 class="text-3xl text-white font-extrabold mb-8">Exercise</h2>
             <div class="w-full overflow-x-auto">
                 <div class="flex gap-10 pb-12 min-w-[850px]">
-                    @forelse ($topics as $topic)
+                    @foreach ($topics as $topic)
                         <div class="flex flex-col items-center">
                             <!-- Neon Large Card -->
                             <div class="neon-card w-[340px] h-[430px] flex flex-col justify-between px-6 py-7 mb-4 shadow-2xl">
                                 <div>
                                     <h3 class="text-2xl font-bold mb-4 text-[#15f7fc]">{{ $topic->topic_title }}</h3>
                                     <div class="overflow-y-auto max-h-[280px] pr-1 custom-scroll">
-                                        @forelse ($topic->exercises as $exercise)
-                                            @php
-                                                // Get answer for current student (if eager loaded, else fallback)
-                                                $answer = $exercise->answers->where('student_id', auth()->id())->first() ?? null;
-                                            @endphp
+                                        @foreach ($topic->exercises as $exercise)
+                                            @php $answer = optional($exercise->answers)->first(); @endphp
                                             <div class="bg-[#071c2d] text-white mb-3 rounded-lg px-3 py-2 border border-[#15f7fc44]">
-                                                <div class="font-semibold text-[#15f7fc]">{{ $exercise->exercise_title }}</div>
+                                                <div class="font-semibold text-[#15f7fc]">Exercise {{ $loop->iteration }} :  {{ $exercise->exercise_title }}</div>
                                                 <div class="text-sm mt-1">Status:
                                                     <span class="font-bold text-[#13e2be]">
                                                         {{ $answer?->status ?? 'Not Started' }}
@@ -115,23 +92,17 @@
                                                     Answer
                                                 </a>
                                             </div>
-                                        @empty
-                                            <div class="text-gray-400 italic mt-4">No exercises for your group in this topic.</div>
-                                        @endforelse
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>
-                            <!-- Neon Small Box for Topic Name -->
-                            <div class="neon-label px-7 py-3 text-lg font-bold text-[#15f7fc] text-center shadow">
-                                {{ 'Topic ' . $loop->iteration }}
-                            </div>
+                            
                         </div>
-                    @empty
-                        <div class="text-white">No topics available for your group.</div>
-                    @endforelse
+                    @endforeach
                 </div>
             </div>
         </main>
+
     </div>
 
     <style>
@@ -151,6 +122,7 @@
             0 0 80px 4px #15f7fc55 inset;
         border-color: #13e2be;
     }
+
     .neon-label {
         background: rgba(8, 15, 35, 0.97);
         border: 3px solid #15f7fc;
@@ -168,6 +140,8 @@
         background: #13e2be44;
         border-radius: 6px;
     }
+
+
     .neon-frame {
         background: rgba(10, 10, 30, 0.90);
         border: 3px solid #15f7fc;
@@ -244,4 +218,10 @@
         background: #050e1a;
     }
     </style>
+    <script>
+        function toggleExercises(topic_id) {
+            const div = document.getElementById('exercises-' + topic_id);
+            div.style.display = div.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
 </x-app-layout>

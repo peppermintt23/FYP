@@ -34,45 +34,50 @@
         </script>
 
     <!-- Progress‐map component logic -->
-    
+    <script src="//unpkg.com/alpinejs" defer></script>
 <script>
-document.addEventListener('alpine:init', () => {
-  Alpine.data('progressMap', () => ({
-    percentages: [],
-    pathEl: null,
-    totalLen: 0,
-    currentIndex: 0,
-    jumping: false,
-
-    init(pcts) {
-      this.percentages  = pcts;
-      this.pathEl       = this.$refs.orbitPath;
-      this.totalLen     = this.pathEl.getTotalLength();
-
-      // position on last completed
-      let idx = this.percentages.findIndex(p => p < 100);
-      this.currentIndex = (idx === -1 ? this.percentages.length - 1 : Math.max(0, idx - 1));
-    },
-
-    planetStyle(i) {
-      const t  = i / ((this.percentages.length - 1) || 1);
-      const pt = this.pathEl.getPointAtLength(t * this.totalLen);
-      return { left: `${pt.x - 16}px`, top: `${pt.y - 16}px` };
-    },
-
-    astronautStyle() {
-      const t  = this.currentIndex / ((this.percentages.length - 1) || 1);
-      const pt = this.pathEl.getPointAtLength(t * this.totalLen);
-      return { left: `${pt.x - 24}px`, top: `${pt.y - 36}px` };
-    },
-
-    jumpTo(idx) {
-      this.currentIndex = idx;
-      this.jumping = true;
-      setTimeout(() => this.jumping = false, 700);
-    },
-  }));
-});
+function progressMap(pcts = [], idx = 0) {
+    return {
+        percentages: Array.isArray(pcts) ? pcts.map(Number) : [],
+        activeIdx: typeof idx === 'number' ? idx : 0,
+        positions: [],
+        jumping: false,
+        init() {
+            this.$nextTick(() => {
+                const path = this.$refs.orbitPath;
+                if (!path) return;
+                const len = path.getTotalLength();
+                // Single topic: center
+                if (this.percentages.length === 1) {
+                    const svgPt = path.getPointAtLength(len * 0.5);
+                    this.positions = [{ left: svgPt.x, top: svgPt.y }];
+                } else {
+                    this.positions = this.percentages.map((_, i, arr) => {
+                        const pct = arr.length > 1 ? i / (arr.length - 1) : 0;
+                        const svgPt = path.getPointAtLength(len * pct);
+                        return { left: svgPt.x, top: svgPt.y };
+                    });
+                }
+                this.doJump();
+            });
+        },
+        planetStyle(idx) {
+            if (!this.positions[idx]) return '';
+            return `left:${this.positions[idx].left - 24}px;top:${this.positions[idx].top - 24}px;z-index:20;`;
+        },
+        astronautStyle() {
+            if (!this.positions[this.activeIdx]) return '';
+            return `left:${this.positions[this.activeIdx].left - 24}px;top:${this.positions[this.activeIdx].top - 56}px;z-index:30;`;
+        },
+        doJump() {
+            this.jumping = false;
+            this.$nextTick(() => {
+                this.jumping = true;
+                setTimeout(() => { this.jumping = false; }, 700);
+            });
+        }
+    }
+}
 </script>
 
 

@@ -87,7 +87,7 @@
             </div>
         @else
             {{-- Podium for top 3 --}}
-            <div class="flex flex-col md:flex-row justify-center items-end md:space-x-8 space-y-4 md:space-y-0 mb-10">
+            <div id="podium-wrapper" class="flex flex-col md:flex-row justify-center items-end md:space-x-8 space-y-4 md:space-y-0 mb-10">
                 @foreach($leaderboard->take(3) as $idx => $entry)
                     @php
                         // Podium heights: Gold = tallest, Silver = shorter, Bronze = shortest
@@ -98,8 +98,8 @@
                             default => ''
                         };
                         $podiumStyle = match($idx) {
-                            0 => 'pt-14 mb-2',  // Gold
-                            1, 2 => 'pt-10 mb-6', // Silver/Bronze
+                            0 => 'mt-10 pt-8 mb-2',  // Gold
+                            1, 2 => 'mt-10 pt-6 mb-6', // Silver/Bronze
                         };
                         $medal = ['🥇','🥈','🥉'][$idx];
                         $border = match($idx) {
@@ -141,10 +141,10 @@
                             <th class="py-3 px-4 text-[#15f7fc] text-base tracking-widest">Point</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-[#061928cc]">
+                    <tbody class="bg-[#061928cc]" id="table-body">
                         @foreach($leaderboard->slice(3) as $idx => $entry)
                         <tr class="hover:bg-[#132946bb] transition">
-                            <td class="py-3 px-4 text-white font-bold">{{ $idx+4 }}</td>
+                            <td class="py-3 px-4 text-white font-bold">{{ $idx+1 }}</td>
                             <td class="flex items-center justify-center py-3 px-4 space-x-2">
                                 <img src="{{ asset('asset/avatars/' . ($entry->student->avatar ?? 'default-avatar.png')) }}"
                                      class="w-10 h-10 rounded-full border-2 border-[#15f7fc] shadow"
@@ -167,6 +167,71 @@
         </div>
     </main>
 </div>
+
+<script>
+    function renderLeaderboard(data) {
+        let podium = '';
+        let tableRows = '';
+        data.leaderboard.forEach(function(entry, idx) {
+            // 1-3: podium, rest: table
+            if(idx < 3) {
+                // Adjust styling as in your blade for podium!
+                let border = idx == 0 ? '#ffe484' : (idx == 1 ? '#15f7fcbb' : '#15f7fc88');
+                let imgSize = idx == 0 ? 'w-24 h-24' : 'w-20 h-20';
+                let medal = ['🥇','🥈','🥉'][idx];
+                let boxClass = idx == 0 ? 'w-64 h-80 scale-110' : 'w-52 h-60 md:w-56 md:h-64';
+                podium += `
+                    <div class="flex flex-col items-center">
+                        <div class="relative flex flex-col items-center bg-[#061928ee] border-2 border-[${border}] rounded-2xl p-5 shadow-lg neon-inner ${boxClass}">
+                            <div class="absolute -top-16 left-1/2 -translate-x-1/2">
+                                <img src="/asset/avatars/${entry.avatar}" class="rounded-full border-4 border-[${border}] shadow-lg ${imgSize}" alt="${entry.name}">
+                            </div>
+                            <div class="mt-16 text-center">
+                                <span class="block font-bold text-lg text-[#15f7fc]">${entry.name}</span>
+                                <span class="block text-base text-[#ffe484] font-semibold">
+                                    ${entry.elapsed_time ? new Date(entry.elapsed_time * 1000).toISOString().substr(14, 5) : '-'}
+                                </span>
+                                <span class="block text-base font-bold text-[#b3f3f8]">POINT : <span class="text-[#15f7fc]">${entry.student_score}</span></span>
+                            </div>
+                            <div class="absolute -top-7 right-4">
+                                <span style="font-size:${idx==0?'3rem':'2rem'};">${medal}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                tableRows += `
+                    <tr class="hover:bg-[#132946bb] transition">
+                        <td class="py-3 px-4 text-white font-bold">${idx+1}</td>
+                        <td class="flex items-center justify-center py-3 px-4 space-x-2">
+                            <img src="/asset/avatars/${entry.avatar}" class="w-10 h-10 rounded-full border-2 border-[#15f7fc] shadow" alt="${entry.name}">
+                            <span class="text-white font-semibold">${entry.name}</span>
+                        </td>
+                        <td class="py-3 px-4 text-white font-bold">
+                            ${entry.elapsed_time ? new Date(entry.elapsed_time * 1000).toISOString().substr(14, 5) : '-'}
+                        </td>
+                        <td class="py-3 px-4 text-[#15f7fc] font-bold">
+                            ${entry.student_score}
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+
+        document.getElementById('podium-wrapper').innerHTML = `<div class="flex flex-col md:flex-row justify-center items-end md:space-x-8 space-y-4 md:space-y-0 mb-14 mt-12">${podium}</div>`;
+        document.getElementById('table-body').innerHTML = tableRows;
+    }
+
+    function updateLeaderboard() {
+        fetch('{{ route('leaderboard.overall.data', ['exerciseId' => $exercise->id]) }}')
+            .then(res => res.json())
+            .then(data => renderLeaderboard(data));
+    }
+
+    setInterval(updateLeaderboard, 5000);
+    window.onload = updateLeaderboard;
+</script>
+
 
 <style>
 .neon-frame {

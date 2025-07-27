@@ -5,20 +5,29 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\NewUserController;
 use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\PasswordChangeController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\AnswerController;
 use App\Http\Controllers\CppCompilerController;
 use App\Http\Controllers\LecturerCourseController;
-use App\Http\Controllers\StudentDashboardController;
-use App\Models\CourseEnrollment;
 use App\Http\Controllers\StudentLeaderboardController;
+use App\Http\Controllers\ProgressReportController;
 
-Route::get('/forgottt-password', function () {
-        return view('forgottt-password'); // ensure this matches your blade filename/casing
-    })->name('abc');
+
+// Route::get('/forgot-password', function () {
+//         return view('forgotPassword'); // ensure this matches your blade filename/casing
+//     })->name('forgotPassword');
+
+// FORGOT PASSWORD (common for all users)
+Route::get('/fPassword', [ForgotPasswordController::class, 'fPassword'])->name('auth.fPassword');
+
+
+Route::post('/forgot-password/verify', [ForgotPasswordController::class, 'verifyEmail'])->name('auth.fPassword.verify');
+Route::get('/reset-password/{user}', [ForgotPasswordController::class, 'showResetForm'])->name('auth.reset-password');
+Route::post('/', [ForgotPasswordController::class, 'submitResetPassword'])->name('auth.reset-password.submit');
+
 
 Route::get('/', function () {
     return view('auth.login');
@@ -47,8 +56,6 @@ Route::middleware('auth')->group(function () {
 Route::get('/new-user', [NewUserController::class, 'showForm'])->name('new-user.form');
 Route::post('/new-user', [NewUserController::class, 'sendTemporaryPassword'])->name('new-user.send');
 
-Route::get('/change-password', [PasswordChangeController::class, 'showForm'])->name('password.change.form');
-Route::post('/change-password', [PasswordChangeController::class, 'change'])->name('password.change');
 
 // Group routes for authenticated users
 Route::middleware(['auth'])->group(function () {
@@ -60,7 +67,9 @@ Route::middleware(['auth'])->group(function () {
      //   return view('student-dashboard');
     //})->name('student-dashboard');
 
-    // routes/web.php
+    Route::get('/lecturer/dashboard', [DashboardController::class, 'index'])
+        ->name('lecturer.dashboard');
+
     Route::get('/student/dashboard', [App\Http\Controllers\StudentDashboardController::class, 'index'])
         ->name('student-dashboard');
 
@@ -80,13 +89,6 @@ Route::middleware(['auth'])->group(function () {
 
     // C++ Compiler route (API to Judge0)
     Route::post('/run-cpp', [CppCompilerController::class, 'runCpp'])->name('cpp.run');
-
-    // -------------------------------
-    // Lecturer Routes
-    // -------------------------------
-    Route::get('/lecturer/dashboard', [DashboardController::class, 'index'])
-        ->name('lecturer.dashboard');
-
 
     Route::get('/lecturer/manage-notes', [TopicController::class, 'manageNotes'])->name('manage.notes');
     // View inline (instead of download)
@@ -121,7 +123,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/lecturer/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
 
     // Exercises
-    Route::get('/manage-exercise', [ExerciseController::class, 'manageExercise'])->name('exercises.manage');
+    Route::get('/lecturer/manage-exercise', [ExerciseController::class, 'manageExercise'])->name('exercises.manage');
     Route::get('/lecturer/exercises/manage', [ExerciseController::class, 'manageExercise']);
 
     Route::get('/lecturer/exercises/create/{topic}', [ExerciseController::class, 'create'])->name('exercises.create');
@@ -154,15 +156,18 @@ Route::middleware(['auth'])->group(function () {
         return view('leaderboardOverall');
     })->name('leaderboard.overall');
 
-    // Lecturer view leaderboard 
-    Route::get('/lecturer/leaderboard/', function () {
-        return view('leaderboardLecturer');
-    })->name('leaderboard.lecturer');
+    // // Lecturer view leaderboard 
+    // Route::get('/lecturer/class/{groupCourse}/leaderboard/', function () {
+    //     return view('leaderboardLecturer');
+    // })->name('leaderboard.lecturer');
 
-    // Lecturer view report
-    Route::get('/lecturer/report/', function () {
-        return view('viewStudentProgressReport');
-    })->name('report');
+    Route::get('/lecturer/class/{groupCourse}/leaderboard', [
+        ProfileController::class, 'leaderboardLecturer'])->name('leaderboard.lecturer');
+
+    // // Lecturer view report
+    // Route::get('/lecturer/report/', function () {
+    //     return view('viewStudentProgressReport');
+    // })->name('report');
 
     // //student view profile (UI)
     // Route::get('/student/profile/', function () {
@@ -173,19 +178,42 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/student/profile', [ProfileController::class, 'viewStudentProfile'])
          ->name('student.profile');
 
+    // Show lecturer profile
+    Route::get('/lecturer/profile', [ProfileController::class, 'viewLecturerProfile'])
+         ->name('viewLecturerProfile');
+
+    Route::get('/lecturer/class/{groupCourse}/students', [ProfileController::class, 'studentList'])->name('student.list');
+    Route::get('/lecturer/class/{groupCourse}/leaderboard', [ProfileController::class, 'leaderboardLecturer'])->name('leaderboard.lecturer');
+
+
     // Update profile (name, email, avatar, etc.)
     Route::put('/profile', [ProfileController::class, 'update'])
          ->name('profile.update');
 
     // View student leaderboard (personal)
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/student/leaderboard/personal', [StudentLeaderboardController::class, 'personal'])->name('leaderboardPersonal');
-    });
+    // Route::middleware(['auth'])->group(function () {
+    //     Route::get('/student/leaderboard/personal', [StudentLeaderboardController::class, 'personal'])->name('leaderboardPersonal');
+    // });
+
+    Route::get('student/leaderboard/personal', [StudentLeaderboardController::class, 'personalLeaderboard'])
+    ->name('leaderboardPersonal')
+    ->middleware('auth');
+
 
    Route::get('/student/leaderboard/overall/{exerciseId}', [StudentLeaderboardController::class, 'overall'])
     ->name('leaderboardOverall')
     ->middleware('auth');
 
+   Route::get('/leaderboard-overall/data/{exerciseId}', [StudentLeaderboardController::class, 'overallJson'])->name('leaderboard.overall.data');
+
+   Route::middleware('auth')->group(function () {
+        Route::get('lecturer/report', [ProgressReportController::class, 'viewReport'])
+            ->name('viewReport');
+    });
+
+    Route::get('/test-planet', function () {
+    return view('test-planet');
+});
 
 
 

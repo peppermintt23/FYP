@@ -12,6 +12,8 @@ class Answer extends Model
     const STATUS_2 = 'Completed - Pending Feedback';//submittedcode
     const STATUS_3 = 'Completed - Submitted Feedback';
 
+    const STATUS_4 = 'Draft - C++ Coding';
+
     use HasFactory;
     protected $fillable = [
         'student_id', 

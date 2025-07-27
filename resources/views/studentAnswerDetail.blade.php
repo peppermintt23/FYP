@@ -50,8 +50,9 @@
                     class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
                     <span>Exercise</span>
                 </a>
-                <a href="{{ route('leaderboard.lecturer') }}" class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
-                    <span>Leaderboard</span>
+                <a href="{{ route('viewReport') }}"
+                    class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
+                    <span>Progress Report</span>
                 </a>
             </nav>
         </aside>

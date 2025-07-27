@@ -46,10 +46,8 @@
                 <a href="{{ route('exercises.manage', $topic->id ?? 1) }}" class="flex items-center space-x-3 sidebar-link">
                     <span>Manage Exercise</span>
                 </a>
-                <a href="{{ route('leaderboard.lecturer') }}" class="flex items-center space-x-3 sidebar-link">
-                    <span>Leaderboard</span>
-                </a>
-                <a href="report" class="flex items-center space-x-3 sidebar-link">
+                
+                <a href="{{ route('viewReport') }}" class="flex items-center space-x-3 sidebar-link">
                     <span>Progress Report</span>
                 </a>
             </nav>
@@ -127,6 +125,11 @@
         border-right: 3.5px solid #13e2be;
         box-shadow: 0 0 12px #13e2be44, 0 4px 24px #0a243155;
     }
+    aside.fixed .text-2xl {
+            color: #13e2be !important;
+            text-shadow: 0 0 8px #13e2be77;
+        }
+    .neon-frame span,
     .sidebar-link {
         background: transparent;
         border: 2px solid transparent;

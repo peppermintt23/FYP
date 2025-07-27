@@ -55,13 +55,14 @@
                     </a>
                 </div>
                 <div class="py-1">
-                    <form method="POST" action="#">
-                        @csrf
-                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            Logout
-                        </button>
-                    </form>
-                </div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Logout
+                            </button>
+                        </form>
+                    </div>
+    
             </div>
         </div>
     </header>
@@ -77,65 +78,68 @@
         }'
         >
 
-            <form method="POST" action="{{ route('profile.update') }}">
+        <form method="POST" action="{{ route('profile.update') }}">
             @csrf
             @method('PUT')
 
-            {{-- Profile Info --}}
-            <div class="flex flex-col md:flex-row items-center gap-8 mb-8">
-
-                {{-- **Replace your old Avatar Preview block with this:** --}}
-                <div class="flex items-center gap-4">
-                <!-- live preview -->
-                <img
-                    :src=" selected 
-                            ? `{{ asset('asset/avatars') }}/${selected}` 
-                            : `{{ asset('asset/avatars/default-avatar.png') }}`"
-                    alt="Avatar"
-                    class="w-20 h-20 rounded-full border-2"
-                >
-                <!-- button to open picker -->
-                <button type="button"
+            <div class="flex flex-col items-center gap-6">
+                <!-- Avatar at the top -->
+                <div class="flex flex-col items-center">
+                    <img
+                        src="{{ asset('asset/avatars/' . ($user->avatar ?? 'default-avatar.png')) }}"
+                        alt="Avatar"
+                        class="w-24 h-24 rounded-full border-4 border-cyan-400 shadow-lg bg-white object-cover mb-3"
+                    >
+                    <button type="button"
                         @click="showPicker = true"
-                        class="edit-btn">
-                    Choose Avatar
-                </button>
+                        class="edit-btn mb-2">
+                        Choose Avatar
+                    </button>
+                    <input type="hidden" name="avatar" x-model="selected">
                 </div>
 
-                {{-- **Hidden field carries the filename** --}}
-                <input type="hidden" name="avatar" x-model="selected">
-
-                {{-- then your Name & Student Number fields as before... --}}
-                <div class="flex-1 flex flex-col items-center md:items-start">
-                <!-- name input -->
-                <label class="block text-white mb-1">Name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        value="{{ old('name',$user->name) }}"
-                        class="w-full p-2 rounded mb-2"
-                    >
-                    @error('name')<div class="text-red-500 text-sm">{{ $message }}</div>@enderror
-
-                <!-- student_number input -->
-                <label class="block text-white mb-1">Student Number</label>
-                    <input
-                        type="text"
-                        name="student_number"
-                        value="{{ old('student_number',$user->student_number) }}"
-                        class="w-full p-2 rounded mb-4"
-                    >
-                    @error('student_number')<div class="text-red-500 text-sm">{{ $message }}</div>@enderror
-
-                <button type="submit" class="edit-btn mt-4">Save Profile</button>
+                <!-- Name (left) and Student Number (right) side by side -->
+                <div class="flex flex-row gap-8 w-full max-w-2xl justify-center">
+                    <!-- Name -->
+                    <div class="flex-1">
+                        <label class="block text-cyan-300 mb-1">Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value="{{ old('name', $user->name) }}"
+                            class="w-full p-2 rounded mb-2"
+                        >
+                        @error('name')<div class="text-red-500 text-sm">{{ $message }}</div>@enderror
+                        
+                    </div>
+                    <!-- Student Number -->
+                    <div class="flex-1">
+                        <label class="block text-cyan-300 mb-1">Student Number</label>
+                        <input
+                            type="text"
+                            name="student_number"
+                            value="{{ old('student_number', $user->student_number) }}"
+                            class="w-full p-2 rounded mb-2 bg-gray-100"
+                            readonly
+                        >
+                        @error('student_number')<div class="text-red-500 text-sm">{{ $message }}</div>@enderror
+                        
+                    </div>
                 </div>
+
+                <!-- Buttons -->
+                <div class="flex flex-row items-center gap-8 w-full max-w-xl mb-8 ">
+                    <button type="submit" class="edit-btn w-full flex-1">Save Profile</button>
+                    <a href="{{ route('profile.edit') }}" class="edit-btn w-full flex-1 text-center">Edit</a>
+                </div>
+
             </div>
-            </form>
+        </form>
 
              {{-- **Immediately after the closing </form>, paste your modal:** --}}
             <div
-            x-show="showPicker"
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+                x-show="showPicker"
+                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
             >
             <div class="bg-white rounded-lg p-6 w-11/12 max-w-md">
                 <h2 class="text-xl font-semibold mb-4">Select an Avatar</h2>
@@ -201,7 +205,7 @@
                         {{-- Line 3: Feedback (only if present) --}}
                         @if($feedback)
                             <div class="text-sm text-[#13e2be] mt-1">
-                            {{ $feedback }}
+                            FEEDBACK: {{ $feedback }}
                             </div>
                         @endif
                         </div>

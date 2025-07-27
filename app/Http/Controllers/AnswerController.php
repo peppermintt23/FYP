@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Models\Topic;
 use App\Models\Answer;
 use App\Models\Exercise;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use App\Models\Topic;
 
 class AnswerController extends Controller
 {
@@ -39,48 +38,26 @@ class AnswerController extends Controller
     //student view list of exercise
     public function index()
     {
-        $studentId = auth()->id();
-        $enrollment = \App\Models\CourseEnrollment::where('student_id', $studentId)->first();
-        $lecturerId  = $enrollment?->lecturer_id ?? null;
-        $groupCourse = $enrollment?->groupCourse ?? null;
-        $courseId    = $enrollment?->course_id ?? null;
-
-        // Only show topics for this course
-         $topics = \App\Models\Topic::where('course_id', $courseId)
-            ->with(['exercises' => function($q) use ($groupCourse, $lecturerId) {
-                // Only exercises created for THIS class (groupCourse) by THIS lecturer
-                $q->where('groupCourse', $groupCourse)
-                ->where('lecturer_id', $lecturerId);
-            }])
-            ->orderBy('id')
-            ->get();
-
+        $topics = Topic::with(['exercises.answers' => function ($query) {
+            $query->where('student_id', auth()->id());
+        }])->get();
 
         return view('viewExercise', compact('topics'));
     }
-
 
     //for student page: view exercise answer
     public function show(Exercise $exercise, Request $request)
     {
         $exercise->load('guidelines');
 
-        // In show(Exercise $exercise, Request $request)
         $studentId = $request->input('student_id', auth()->id());
-        $enrollment = \App\Models\CourseEnrollment::where('student_id', $studentId)->first();
-        $groupCourse = $enrollment?->groupCourse ?? null;
-
-        if ($exercise->groupCourse !== $groupCourse) {
-            abort(403, "You are not allowed to access this exercise.");
-        }
-
         //dd($studentId);
 
         // find any existing record (just to maybe preload)
         $existingAnswer = Answer::where('exercise_id', $exercise->id)
             ->where('student_id', $studentId)
             ->first();
-
+        //dd($existingAnswer->status);
         $submittedGuideline = Answer::where('exercise_id', $exercise->id)
             ->where('student_id', $studentId)
             ->where('status', operator: Answer::STATUS_1)
@@ -113,10 +90,25 @@ class AnswerController extends Controller
             'elapsed_time'  => 'required|integer',
         ]);
 
+        $studentId = auth()->id();
+        $elapsed   = $data['elapsed_time'];
+
+        $answer = Answer::where('student_id', $studentId)
+        ->where('exercise_id', $exercise->id)
+        ->where('category', $data['category'])
+        ->first();
+
+        if (!$answer) {
+            return back()->with('error', 'Answer not found.');
+        }
+
+
+        $rawScore = $answer->student_score ?? 0;
+
         // 2) Calculate your score
-        $rawScore   = $exercise->score ?? 0;
-        $elapsed    = $data['elapsed_time'];
-        $finalScore = ($elapsed <= 600) ? ($rawScore * 2) : $rawScore;
+        $finalScore = ($elapsed <= 60 && $rawScore > 0)
+        ? $rawScore * 2
+        : $rawScore;
 
         // 3) Update the answer record
         Answer::where('student_id', auth()->id())
@@ -245,12 +237,12 @@ class AnswerController extends Controller
         $request->validate([
             'answer_id' => 'required|exists:answers,id',
             'feedback' => 'required|string',
-            'score' => 'required|numeric|min:0|max:20'
+            //'score' => 'required|numeric|min:0|max:20'
         ]);
 
         $answer = Answer::findOrFail($request->answer_id);
         $answer->feedback = $request->feedback;
-        $answer->student_score = $request->score;
+       // $answer->student_score = $request->score;
         $answer->status = Answer::STATUS_3;
 
         if (!$answer->save()) {
@@ -268,21 +260,21 @@ class AnswerController extends Controller
         $studentId = $request->input('student_id');
 
         $request->validate([
-            'scores' => 'required|array',
-            'scores.*' => 'nullable|integer|min:0|max:100',
+            //'scores' => 'required|array',
+           // 'scores.*' => 'nullable|integer|min:0|max:100',
             'feedback' => 'nullable|string',
             'exercise_id' => 'required|integer',
             'student_id' => 'required|integer'
         ]);
 
         // update each individual score
-        foreach ($request->scores as $answerId => $score) {
-            $answer = Answer::find($answerId);
-            if ($answer && $answer->student_id == $request->student_id) {
-                $answer->student_score = $score;
-                $answer->save();
-            }
-        }
+        // foreach ($request->scores as $answerId => $score) {
+        //     $answer = Answer::find($answerId);
+        //     if ($answer && $answer->student_id == $request->student_id) {
+        //         $answer->student_score = $score;
+        //         $answer->save();
+        //     }
+        // }
 
         // update feedback in parent answer
         $parentAnswer = Answer::where('exercise_id', $request->exercise_id)

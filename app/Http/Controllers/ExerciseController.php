@@ -62,17 +62,9 @@ class ExerciseController extends Controller
     // Display the manage exercise page with topics and their exercises
     public function manageExercise()
     {
-        $lecturerId = auth()->id();
-        $groupCourses = \App\Models\CourseEnrollment::where('lecturer_id', $lecturerId)->pluck('groupCourse');
-        $topics = Topic::whereIn('course_id', function($q) use ($groupCourses) {
-            $q->select('course_id')
-            ->from('course_enrollment')
-            ->whereIn('groupCourse', $groupCourses);
-        })->with('exercises')->get();
-
+        $topics = Topic::with('exercises')->get();
         return view('manageExercise', compact('topics'));
     }
-
 
     // Show form to create a new exercise under a specific topic
     public function create(Topic $topic)
@@ -92,28 +84,14 @@ class ExerciseController extends Controller
         ]);
         //dd($request->input('has_guideline'));  // This will show the value of has_guideline being sent in the request
 
-         // Find lecturer's current groupCourse for this topic
-        $lecturerId = auth()->id();
-        // Usually, lecturer chooses which class (groupCourse) this is for in a form dropdown.
-        // For now, let's get all groupCourse(s) for this lecturer+course, or pick one:
-        $enrollment = \App\Models\CourseEnrollment::where('lecturer_id', $lecturerId)
-            ->where('course_id', $topic->course_id)
-            ->first();
-
-        // If you want to support selecting groupCourse in your form, replace below accordingly
-        $groupCourse = $request->input('groupCourse', $enrollment ? $enrollment->groupCourse : null);
-
-
         // Create the exercise
         $exercise = $topic->exercises()->create([
             'exercise_title' => $request->exercise_title,
             'question' => $request->question,
             'hint' => $request->hint,
-            'expected_output' => $request->hint,
+            'expected_output' => $request->expected_output,
             'score' => $request->score,
             'has_guideline' => $request->has_guideline,
-            'groupCourse' => $groupCourse,
-            'lecturer_id' => $lecturerId,
         ]);
         //dd($exercise); 
 
@@ -184,4 +162,4 @@ class ExerciseController extends Controller
         return back()->with('success', 'Exercise deleted successfully.');
     }
 
-}
+}  

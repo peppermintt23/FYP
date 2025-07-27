@@ -12,8 +12,7 @@
                 <div x-show="open" @click.away="open = false" x-transition
                     class="absolute right-0 mt-2 w-48 bg-[#0f172a] border border-cyan-400 rounded shadow-md divide-y divide-gray-200 z-50">
                     <div class="py-1">
-                        <a href="#"
-                            class="block px-4 py-2 text-sm text-cyan-200 hover:bg-cyan-900 hover:text-white">
+                        <a href="{{ url('/lecturer/profile/') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             Profile
                         </a>
                     </div>
@@ -46,10 +45,7 @@
                 <a href="{{ route('exercises.manage', $topic->id ?? 1) }}" class="flex items-center space-x-3 sidebar-link">
                     <span>Manage Exercise</span>
                 </a>
-                <a href="{{ route('leaderboard.lecturer') }}" class="flex items-center space-x-3 sidebar-link">
-                    <span>Leaderboard</span>
-                </a>
-                <a href="report" class="flex items-center space-x-3 sidebar-link">
+                <a href="{{ route('viewReport') }}" class="flex items-center space-x-3 sidebar-link">
                     <span>Progress Report</span>
                 </a>
             </nav>
@@ -75,7 +71,7 @@
 
                 <!-- Add Topic Form -->
                 <h2 class="text-3xl font-bold mb-6 text-cyan-300">Manage Topics & Exercises</h2>
-                <form method="GET" action="" class="flex items-center space-x-4 mb-6">
+                {{-- <form method="GET" action="" class="flex items-center space-x-4 mb-6">
                     <select name="course_id" class="neon-input flex-1">
                         @foreach ($courses as $course)
                             <option value="{{ $course->id }}"
@@ -85,7 +81,7 @@
                         @endforeach
                     </select>
                     <button type="submit" class="neon-btn bg-[#7d5fff]">Filter</button>
-                </form>
+                </form> --}}
 
                 <!-- Topics List -->
                 @foreach ($topics as $topic)
@@ -175,7 +171,11 @@
         border-right: 3.5px solid #13e2be;
         box-shadow: 0 0 12px #13e2be44, 0 4px 24px #0a243155;
     }
-
+    aside.fixed .text-2xl {
+            color: #13e2be !important;
+            text-shadow: 0 0 8px #13e2be77;
+        }
+    .neon-frame span,
     .sidebar-link {
         background: transparent;
         border: 2px solid transparent;

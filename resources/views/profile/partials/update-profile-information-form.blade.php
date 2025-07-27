@@ -30,7 +30,7 @@
         <div>
             <x-input-label class="text-white" for="staff_number" :value="__('Staff ID')" />
             <x-text-input id="staff_number" name="staff_number" type="text" class="mt-1 block w-full"
-                :value="old('staff_number', $user->staff_number)" autocomplete="off" />
+                :value="old('staff_number', $user->staff_number)" autocomplete="off" readonly />
             <x-input-error class="mt-2" :messages="$errors->get('staff_number')" />
         </div>
         @endif
@@ -40,7 +40,7 @@
         <div>
             <x-input-label class="text-white" for="student_number" :value="__('Student Number')" />
             <x-text-input id="student_number" name="student_number" type="text" class="mt-1 block w-full"
-                :value="old('student_number', $user->student_number)" autocomplete="off" />
+                :value="old('student_number', $user->student_number)" autocomplete="off" readonly/>
             <x-input-error class="mt-2" :messages="$errors->get('student_number')" />
         </div>
         @endif
@@ -58,7 +58,7 @@
         <div>
             <x-input-label class="text-white" for="position" :value="__('Position')" />
             <x-text-input id="position" name="position" type="text" class="mt-1 block w-full"
-                :value="old('position', $user->position)" />
+                :value="old('position', $user->position)" readonly/>
             <x-input-error class="mt-2" :messages="$errors->get('position')" />
         </div>
         

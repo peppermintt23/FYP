@@ -1,35 +1,33 @@
 @extends('layouts.guest')
 @section('content')
-    <h2 class="text-2xl text-cyan-300 font-bold mb-8 text-center tracking-widest">Reset Your Password</h2>
-    <form method="POST" action="{{ route('auth.reset-password.submit') }}">
+
+    <div class="absolute top-4 left-4">
+        <a class="underline text-sm text-cyan-300 hover:text-white font-semibold" href="/">
+            {{ __('← Back') }}
+        </a>
+    </div>
+    <h2 class="text-2xl text-cyan-300 font-bold mb-8 text-center tracking-widest">Forgot Password</h2>
+    <form method="POST" action="{{ route('auth.fPassword.verify') }}">
         @csrf
-        <input type="hidden" name="user_id" value="{{ $user_id }}">
         <div class="mb-6">
             <input
-                type="password"
-                name="password"
+                type="email"
+                name="email"
                 class="w-full px-5 py-3 neon-input border-2 border-cyan-400 rounded-xl bg-[#050e1a] text-cyan-100 placeholder-cyan-400 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
-                placeholder="New Password"
+                placeholder="Enter your email"
+                value="{{ old('email') }}"
                 required
+                autocomplete="email"
             >
-            @error('password')
+            @error('email')
                 <span class="text-red-400 text-xs mt-2 block">{{ $message }}</span>
             @enderror
-        </div>
-        <div class="mb-6">
-            <input
-                type="password"
-                name="password_confirmation"
-                class="w-full px-5 py-3 neon-input border-2 border-cyan-400 rounded-xl bg-[#050e1a] text-cyan-100 placeholder-cyan-400 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
-                placeholder="Confirm New Password"
-                required
-            >
         </div>
         <button
             type="submit"
             class="w-full bg-gradient-to-r from-cyan-400 to-blue-700 text-[#101b2a] font-bold px-6 py-3 rounded-xl shadow neon-btn hover:from-blue-500 hover:to-cyan-300 hover:text-white transition"
         >
-            Set New Password
+            Verify Email
         </button>
     </form>
 

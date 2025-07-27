@@ -107,14 +107,8 @@
                         </svg>
                         <span>Manage Exercise</span>
                     </a>
-                    <a href="#" class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span>Leaderboard</span>
-                    </a>
-                    <a href="report" class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
+                </a>
+                    <a href="{{ route('viewReport') }}" class="flex items-center space-x-3 hover:bg-[#9158A1] p-2 rounded">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
@@ -126,10 +120,8 @@
         @endif
         <!-- Main Content -->
         <main class="ml-55 mt-20 p-8 min-h-screen bg-transparent flex justify-center">
-            
-            <div class="w-full max-w-4xl mx-auto flex flex-col gap-6">
-            <!-- Stopwatch -->
-                @if (!$existingAnswer || $existingAnswer->status == Answer::STATUS_1)
+           {{-- <p class="text-white">{{ $existingAnswer }}</p> --}}
+            @if (!$existingAnswer || $existingAnswer->status == Answer::STATUS_1 || $existingAnswer->status == Answer::STATUS_4)
                 <div
                     id="stopwatch"
                     class="fixed top-20 right-6 flex items-center justify-between bg-[#050e1ae0] px-4 py-2 rounded-xl shadow-[0_0_12px_#15f7fc88] border border-[#13e2be] z-50"
@@ -144,12 +136,20 @@
                         <span id="timer">00:00:00</span>
                     </div>
 
+                    
                     <a
                         href="{{ route('answer.index') }}"
                         class="ml-4 text-[#15f7fc] bg-[#071c2d] border-2 border-cyan-400 hover:bg-[#0a2239] hover:text-white px-2 py-1 rounded-full shadow transition duration-150 flex items-center justify-center"
                         style="line-height: 1;"
                     >&times;</a>
                 </div>
+                @endif
+                
+            <div class="w-full max-w-4xl mx-auto flex flex-col gap-6">
+            <!-- Stopwatch -->
+                @if (!$existingAnswer || $existingAnswer->status == Answer::STATUS_1)
+                
+                
                 @endif
 
 
@@ -174,8 +174,9 @@
                         @endif
                     </div>
                     <!-- Submission or Feedback logic -->
-                    --- {{ $submittedGuideline }}---
+                  
                     @if (!$existingAnswer && $exercise?->has_guideline == 'Yes')
+                    
                         <!-- Show Submission Form for Guideline Steps -->
                         <form action="{{ route('answer.submitExercise', $exercise->id) }}" method="POST">
                             @csrf
@@ -194,7 +195,9 @@
                             <button type="submit" class="mt-4 bg-blue-500 px-4 py-2 rounded text-white">Submit
                                 Answer</button>
                         </form>
+                        {{-- START HERE --}}
                     @elseif ($existingAnswer?->status != Answer::STATUS_1 && $exercise?->has_guideline == 'No')
+                    
                         @if ($existingAnswer?->status != Answer::STATUS_2 && $existingAnswer?->status != Answer::STATUS_3)
                             <!-- Show code input for compiler-based question with no guideline -->
                             <form method="POST" action="{{ route('cpp.run') }}">
@@ -207,8 +210,7 @@
                                     {{ $existingAnswer?->answer }}
                                 </textarea>
 
-                                <button type="submit" class="mt-4 bg-blue-500 px-4 py-2 rounded text-white">Run
-                                    Code</button>
+                                <button type="submit" class="mt-4 bg-blue-500 px-4 py-2 rounded text-white">Run Code</button>
                             </form>
                         @endif
                         @if (session('compiler_status'))
@@ -220,20 +222,23 @@
                             @endphp
 
                             <hr class="my-6">
-                            <h3 class="text-xl font-bold">Output:</h3>
-                            <pre class="bg-gray-200 p-4 rounded text-sm whitespace-pre-wrap {{ $outputColor }}">
-                            {{ session('compiler_output') }}
-                            </pre>
-                            <p class="mt-2"><strong>Compiler Status:</strong> {{ session('compiler_status') }}</p>
+                            <h3 class="text-xl font-bold text-white">Output:</h3>
+                           <pre class="bg-gray-200 p-4 rounded text-sm whitespace-pre-wrap {{ $outputColor }} max-w-md overflow-x-auto">
+    {{ session('compiler_output') }}
+</pre>
 
-                            <p class="mt-2 font-semibold">
+
+
+                            <p class="mt-2 text-white"><strong>Compiler Status:</strong> {{ session('compiler_status') }}</p>
+
+                            <p class="mt-2 font-semibold text-white">
                                 Result:
                                 <span class="{{ $isPass ? 'text-green-600' : 'text-red-600' }}">
                                     {{ $isPass ? '✅ Pass, Congrats!' : '❌ Not Pass, Please Check your code again!' }}
                                 </span><br>
                                 {{-- Score is probably not set until submission is finalized --}}
                             </p>
-                            <form
+                            <form id="final-answer-form" 
                                 action="{{ route('answer.submitFinalExercise', $exercise->id) }}" 
                                 method="POST"
                             >
@@ -262,10 +267,10 @@
                                         <input type="hidden" name="answer_id" value="{{ $submittedCode->id }}">
                                         Feedback : <br>
                                         <textarea style="width:100%;height:130px;" name="feedback" required></textarea><br>
-                                        Latest Point :
+                                        {{-- Latest Point :
                                         <input type="number" name="score"
                                             value="{{ $submittedCode->student_score ?? 0 }}" min="0"
-                                            max="20" required />
+                                            max="20" required /> --}}
                                         <button type="submit"
                                             class="mt-4 bg-blue-500 px-4 py-2 rounded text-white">Submit
                                             Feedback
@@ -274,7 +279,7 @@
                                 @elseif($submittedFeedback && $submittedFeedback->status == Answer::STATUS_3)
                                     <div class="mb-2">
                                         <strong>Lecturer Feedback:</strong> {{ $submittedFeedback->feedback }}<br>
-                                        <strong>Latest Point:</strong> {{ $submittedFeedback->student_score }}
+                                        {{-- <strong>Latest Pointt:</strong> {{ $submittedFeedback->student_score }} --}}
                                     </div>
                                 @endif
 
@@ -287,7 +292,8 @@
                         ($existingAnswer && $existingAnswer->status == Answer::PENDING_STATUS) ||
                             ($submittedGuideline && $submittedGuideline->status == Answer::STATUS_1) ||
                             ($submittedCode && $submittedCode->status == Answer::STATUS_2) ||
-                            ($submittedFeedback && $submittedFeedback->status == Answer::STATUS_3))
+                            ($submittedFeedback && $submittedFeedback->status == Answer::STATUS_3)||
+                            ($existingAnswer && $existingAnswer->status == Answer::STATUS_4))
                         <!-- Show Student Answer and Code Run if Needed -->
 
                         @if (Auth::check() && Auth::user()->role == 'student')
@@ -341,7 +347,8 @@
                             $studentCode = $existing?->answer ?? '';
                         @endphp
 
-                        @if ($existing && ($submittedGuideline && $submittedGuideline->status == Answer::STATUS_1))
+                        @if ($existing && ($submittedGuideline && $submittedGuideline->status == Answer::STATUS_1)||
+                        ($existingAnswer->status == Answer::STATUS_4))
                             <form method="POST" action="{{ route('cpp.run') }}">
                                 @csrf
                                 <input type="hidden" name="exercise_id" value="{{ $exercise->id }}" />
@@ -394,6 +401,7 @@
                         @elseif(
                             ($submittedCode && $submittedCode->status == Answer::STATUS_2) ||
                                 ($submittedFeedback && $submittedFeedback->status == Answer::STATUS_3))
+                            {{-- CLOSE BUTTON --}}
                             <!-- Graded/Feedback view -->
                             @php
                                 // $existing = \App\Models\Answer::where('student_id', $studentId)
@@ -414,7 +422,7 @@
                             </div>
 
                             <p class="text-white mt-2 font-semibold">
-                                Result #<span>Point : {{ $existing?->student_score ?? 0 }} pt</span>
+                                <span>Point : {{ $existing?->student_score ?? 0 }} pt</span>
                             </p>
                             <br>
                             @if ($submittedCode && $submittedCode->status == Answer::STATUS_2 && Auth::user()->role == 'lecturer')
@@ -435,10 +443,10 @@
                                     <input type="hidden" name="answer_id" value="{{ $submittedCode->id }}">
                                     <p class="text-white">Feedback:</p> <br>
                                     <textarea style="width:100%;height:130px;" name="feedback" required></textarea><br>
-                                    <p class="text-white">Latest Point :</p>
+                                    {{-- <p class="text-white">Latest Point:</p>
                                     <input type="number" name="score"
                                         value="{{ $submittedCode->student_score ?? 0 }}" min="0"
-                                        max="20" required />
+                                        max="20" required /> --}}
                                     <button type="submit"
                                         class="mt-4 bg-blue-500 px-4 py-2 rounded text-white">Submit
                                         Feedback
@@ -451,11 +459,11 @@
                                     </strong>
                                     <strong class="text-blue-300"> {{ $submittedFeedback->feedback }} </strong> <br>
 
-                                    <strong class="text-white">
+                                    {{-- <strong class="text-white">
                                         Latest Point:
                                     </strong> 
                                     <strong class="text-blue-300"> {{ $submittedFeedback->student_score }} </strong> <br>
-                                  
+                                   --}}
                                 </div>
                             @endif
                         @endif
@@ -469,10 +477,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    @if(!$existingAnswer || $existingAnswer->status == Answer::STATUS_1)
+    @if(!$existingAnswer || $existingAnswer->status == Answer::STATUS_1 || $existingAnswer->status == Answer::STATUS_4  )
         // 1) define a storage key that’s unique per exercise
-        const storageKey = 'exercise_{{ $exercise->id }}_start';
-
+        const storageKey = 'exercise_{{ $exercise->id }}_user_{{ auth()->id() }}_start';
+        //console('exercise_{{ $exercise->id }}_user_{{ auth()->id() }}_start');
         // 2) load or init the startTime
         let startTime = localStorage.getItem(storageKey);
         if (startTime) {
@@ -481,9 +489,15 @@ document.addEventListener('DOMContentLoaded', () => {
             startTime = Date.now();
             localStorage.setItem(storageKey, startTime);
         }
+        //console.log('startTime:', startTime);
+
 
         // 3) grab the timer display & start ticking
         const timerDisplay = document.getElementById('timer');
+        if (!timerDisplay) {
+            console.error('Timer display element not found!');
+            return;
+        }       
         function updateTimer() {
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
             const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
@@ -494,9 +508,14 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTimer();
         const interval = setInterval(updateTimer, 1000);
 
+
+
+        
+        console.log('interval:', interval);
         // 4) wire up the form
         const finalForm = document.getElementById('final-answer-form');
         if (finalForm) {
+            //console.log('startTime:', startTime);
             // remove any old timing fields
             ['start_time','end_time','elapsed_time'].forEach(name => {
                 const old = finalForm.querySelector(`[name="${name}"]`);
@@ -568,6 +587,11 @@ document.addEventListener('DOMContentLoaded', () => {
         pointer-events: none;
         border-radius: inherit;
     }
+    aside.fixed .text-2xl {
+            color: #13e2be !important;
+            text-shadow: 0 0 8px #13e2be77;
+        }
+    .neon-frame span,
     .neon-frame:before {
         inset: 0;
         border: 2px solid #19ffe7;

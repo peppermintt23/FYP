@@ -137,7 +137,7 @@
         </div>
 
         <div>
-          <a class="underline text-sm text-gray-200 hover:text-white" href="{{ route('abc') }}">
+          <a class="underline text-sm text-gray-200 hover:text-white" href="{{ route('auth.fPassword') }}">
             {{ __('Forgot password') }}
           </a>
         </div>

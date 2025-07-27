@@ -1,5 +1,7 @@
+
 <x-app-layout>
 <div class="min-h-screen w-full bg-[#050e1a] text-gray-900">
+    
     <!-- Sidebar (Fixed Left) -->
     <aside class="fixed top-0 left-0 h-screen w-64 text-white p-6 z-50">
         <div class="mb-8 flex items-center space-x-3">
@@ -13,6 +15,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 22V12h6v10" />
                 </svg>
                 <span>Dashboard</span>
+
             </a>
             <a href="{{ route('notes.index') }}" class="flex items-center space-x-3 hover:bg-[#142755bb] p-2 rounded">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,57 +70,62 @@
 
     <!-- Main Content -->
     <main class="ml-64 mt-16 p-8 min-h-screen bg-transparent flex flex-col items-center justify-center">
-        <h2 class="text-2xl font-bold text-[#15f7fc] mb-1">PERSONAL LEADERBOARD</h2>
-        <div class="w-full max-w-2xl neon-frame p-8 mt-10 mx-auto">
-           
-            <!-- Centered Profile -->
-            <div class="flex flex-col items-center justify-center mb-10">
-                <div class="w-28 h-28 rounded-full border-4 border-[#15f7fc] flex items-center justify-center shadow-xl bg-[#061928] mb-3">
-                    <img id="student-avatar" 
-                        src="{{ asset('asset/avatars/' . (Auth::user()->avatar ?? 'default-avatar.png')) }}"
-                        alt="Avatar"
-                        class="w-20 h-20 rounded-full border-2"
-                    />
+        <div class="min-h-screen flex items-center justify-center bg-[#0a101a]">
+        <div class="w-full max-w-2xl bg-[#15192b] rounded-2xl shadow-lg p-8 mx-auto border-4 border-cyan-400" style="box-shadow: 0 0 30px #00f0ff;">
+            <div class="flex flex-col items-center mb-6">
+                <div class="rounded-full border-4 border-cyan-400 p-2 mb-2" style="box-shadow: 0 0 15px #00f0ff;">
+                    <img src="{{ $user->avatar ? asset('asset/avatars/' . $user->avatar) : asset('asset/avatars/default-avatar.png') }}"
+                        class="w-24 h-24 rounded-full object-cover" alt="Avatar">
+                </div>
 
-                </div>
-                <div class="mt-2 flex flex-col items-center">
-                    <span id="student-name" class="font-extrabold text-2xl text-white leading-tight">{{ Auth::user()->name }}</span>
-                    <span id="total-point" class="font-bold text-xl mt-2 text-[#15f7fc] tracking-widest">POINT : <span class="text-white">{{ $totalPoints }}</span></span>
-                </div>
+                <h2 class="text-2xl font-bold text-white">{{ $user->name }}</h2>
+                <p class="text-lg text-cyan-400 font-bold">POINT : {{ $totalPoints }}</p>
             </div>
 
-            <div class="w-full overflow-x-auto">
-                <div id="topics-wrapper" class="flex space-x-6 min-w-max">
-                    @foreach ($topics as $topic)
-                        <div class="bg-[#061928dd] border-2 border-[#15f7fc66] rounded-2xl p-5 shadow-lg neon-inner h-64 w-72 flex-shrink-0 overflow-y-auto scrollbar-thin scrollbar-thumb-[#15f7fc33]">
-                            <h3 class="font-bold text-[#15f7fc] text-lg mb-3 tracking-widest">TOPIC {{ $loop->iteration }}</h3>
-                            @foreach ($topic->exercises as $exercise)
-                                @php
-                                    $exerciseAnswer = $answers[$exercise->id] ?? null;
-                                    $points = $exerciseAnswer?->student_score ?? 0;
-                                    $elapsed = $exerciseAnswer?->elapsed_time ?? 0;
-                                    $h = floor($elapsed / 3600);
-                                    $m = floor(($elapsed % 3600) / 60);
-                                    $s = $elapsed % 60;
-                                    $timeStr = sprintf('%02d:%02d:%02d', $h, $m, $s);
-                                @endphp
-                                <div class="flex justify-between text-[#b3f3f8] text-base mb-2">
-                                    <span>
-                                        {{ $exercise->exercise_title }}:
-                                    </span>
-                                    <span>
-                                        {{ $points }} <span class="text-xs text-[#15f7fc99]">({{ $timeStr }})</span>
-                                    </span>
-                                </div>
-                            @endforeach
-
+            <div class="text-center text-cyan-300 text-2xl mb-6 font-bold tracking-widest">PERSONAL LEADERBOARD</div>
+            
+            <div class="flex space-x-5 overflow-x-auto pb-4" style="scrollbar-color: #15f7fc33 #050e1a; scrollbar-width: thin;">
+            @foreach($topics as $topic)
+                <div class="bg-[#181d2f] rounded-xl border border-cyan-400 p-4 shadow"
+                    style="box-shadow: 0 0 10px #00f0ff55; min-width: 300px; max-width: 320px; height: 340px; overflow-y:auto;">
+                    <h3 class="text-cyan-300 text-lg font-bold mb-2 uppercase text-white">Topic {{ $loop->iteration }}</h3>
+                    <div class="w-full">
+                        <div class="grid grid-cols-7 gap-x-3 pb-2 mb-2 border-b border-cyan-900 font-semibold text-cyan-400 text-base">
+                            <div class="col-span-3">Exercise</div>
+                            <div class="col-span-2 text-center">Point</div>
+                            <div class="col-span-1 text-right">Timer</div>
                         </div>
-                    @endforeach
-                </div>
+                        @foreach($topic->exercises as $exercise)
+                            @php
+                                $answer = $answers[$exercise->id] ?? null;
+                                $score = $answer['student_score'] ?? 0;
+                                $elapsed = ($answer && isset($answer['elapsed_time']) && $answer['elapsed_time'] !== null && $answer['elapsed_time'] !== '') 
+                                    ? gmdate("H:i:s", $answer['elapsed_time']) 
+                                    : "00:00:00";
+                            @endphp
+                            <div class="grid grid-cols-7 gap-x-3 py-2 mb-2 items-center rounded hover:bg-[#25365688] transition">
+                                <!-- Exercise No + Title, wider column -->
+                                <div class="col-span-3 text-white whitespace-normal break-words">
+                                    <span class="font-bold text-cyan-300">Exercise {{ $loop->iteration }} : </span>
+                                    
+                                </div>
+                                <div class="col-span-2 text-center text-cyan-200 font-bold">
+                                    {{ $score }}
+                                </div>
+                                <div class="col-span-1 text-right text-xs text-gray-300 font-mono tracking-wide">
+                                    {{ $elapsed }}
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+
+                    </div>
+                @endforeach
             </div>
 
-            </div>
         </div>
+    </div>
     </main>
 </div>
 
@@ -126,8 +134,8 @@
         fetch("{{ route('student.leaderboard.personal.data') }}")
             .then(response => response.json())
             .then(data => {
-                // Update total points
-                document.getElementById('total-point').innerText = data.totalPoints;
+                // Update tot   al points
+                document.getElementById('total-point').innerText = "POINT : " + data.totalPoints;
                 // Update name and avatar if needed
                 document.getElementById('student-name').innerText = data.name;
                 document.getElementById('student-avatar').src = `/asset/avatars/${data.avatar ?? 'default-avatar.png'}`;
@@ -140,10 +148,19 @@
                     topicBox.className = "bg-[#061928dd] border-2 border-[#15f7fc66] rounded-2xl p-5 shadow-lg neon-inner h-64 w-72 flex-shrink-0 overflow-y-auto scrollbar-thin scrollbar-thumb-[#15f7fc33]";
                     let html = `<h3 class="font-bold text-[#15f7fc] text-lg mb-3 tracking-widest">TOPIC ${tIdx + 1}</h3>`;
                     topic.exercises.forEach(function(ex, eIdx) {
-                        let point = data.answers[ex.id]?.student_score ?? '0';
+                        let answer = data.answers[ex.id] ?? { student_score: 0, elapsed_time: 0 };
+                        let point = answer.student_score ?? 0;
+                        let elapsed = answer.elapsed_time ?? 0;
+
+                        // Format elapsed time as HH:MM:SS
+                        let h = Math.floor(elapsed / 3600);
+                        let m = Math.floor((elapsed % 3600) / 60);
+                        let s = elapsed % 60;
+                        let timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
                         html += `<div class="flex justify-between text-[#b3f3f8] text-base mb-2">
                                     <span>${ex.exercise_title}:</span>
-                                    <span>${point}</span>
+                                    <span>${point} <span class="text-xs text-[#15f7fc99]">(${timeStr})</span></span>
                                 </div>`;
                     });
                     topicBox.innerHTML = html;
@@ -151,6 +168,7 @@
                 });
             });
     }, 5000); // every 5 seconds
+
 </script>
 
 <style>

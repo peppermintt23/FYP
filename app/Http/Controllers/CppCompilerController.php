@@ -80,13 +80,15 @@ class CppCompilerController extends Controller
                     'parent_answer_id' => 0,
                     'category' => $cmp,
                     'compiler_output' => $output,
-                    'student_score' => $student_score
+                    'student_score' => $student_score,
+                    'status' =>  Answer::STATUS_4
                 ]);
             } else {
                 $existing->update([
                     'answer' => $code,
                     'compiler_output' => $output,
-                    'student_score' => $student_score
+                    'student_score' => $student_score,
+                    'status' =>  Answer::STATUS_4
                 ]);
             }
 
