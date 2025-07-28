@@ -35,20 +35,33 @@ class NoteController extends Controller
 
     public function download($id)
     {
-        $note = \App\Models\Note::findOrFail($id);
+        $note = Note::findOrFail($id);
         return Storage::disk('public')->download( $note->file_note);
     }
 
-    public function show(Note $note)
+    public function show($id)
     {
-        $path = Storage::disk('public')->path($note->file_note);
-        return response()->file($path);
+        $note = Note::findOrFail($id);
+
+        $path = storage_path('app/public/' . $note->file_note);
+
+        if (!file_exists($path)) {
+            abort(404, 'File not found.');
+        }
+
+        $mime = \Illuminate\Support\Facades\File::mimeType($path);
+
+        return response()->file($path, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . basename($path) . '"'
+        ]);
     }
+
 
     
     public function index()
     {
-        $topics = \App\Models\Topic::with('notes')->get(); // load topics with related notes
+        $topics = Topic::with('notes')->get(); // load topics with related notes
         return view('viewNote', compact('topics'));
     }
 

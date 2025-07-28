@@ -33,6 +33,8 @@ class ProgressReportController extends Controller
             $totalPassed = 0;
             $topicsAvg = [];
 
+            $studentPassed = [];
+
             foreach ($topics as $topic) {
                 $exerciseIds = $topic->exercises->pluck('id')->toArray();
                 $exerciseScores = $topic->exercises->pluck('score', 'id');
@@ -63,8 +65,8 @@ class ProgressReportController extends Controller
                         $percent = ($studentTotalScore / $studentMaxScore) * 100;
                         $studentTopicPercents[] = $percent;
 
-                        if ($percent >= 50) {
-                            $totalPassed++;
+                        if ($percent >= 40 && !in_array($sid, $studentPassed)) {
+                            $studentPassed[] = $sid;
                         }
                     }
                 }
@@ -75,6 +77,7 @@ class ProgressReportController extends Controller
 
                 $topicsAvg[$topic->id] = $topicAvg;
             }
+            $totalPassed = count($studentPassed);
 
             $summary[$groupCourse] = [
                 'topics' => $topicsAvg,
@@ -147,6 +150,8 @@ class ProgressReportController extends Controller
             $detailed[] = $row;
         }
 
+        
+        
         return view('progressReport', [
             'classes' => $classes,
             'topics' => $topics,

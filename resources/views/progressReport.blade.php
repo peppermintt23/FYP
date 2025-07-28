@@ -57,69 +57,81 @@
     <!-- Main Content -->
     <main class="ml-64 pt-24 px-8 min-h-screen flex flex-col items-center">
       <div class="w-full max-w-5xl neon-frame p-8 mx-auto mt-10">
-        <h2 class="text-3xl font-bold text-[#15f7fc] mb-8 text-center tracking-wide">STUDENTS PROGRESS REPORT</h2>
+        <h2 class="text-3xl font-bold text-[#15f7fc] mb-8 text-center tracking-wide">
+          STUDENTS PROGRESS REPORT
+        </h2>
 
-        {{-- CLASS Table --}}
+        <!-- CLASS TABLE -->
         <div class="overflow-x-auto mb-12">
-  <table class="min-w-full text-center border-separate border-spacing-y-3">
-    <thead>
-      <tr class="bg-[#0a132a] text-[#15f7fc] text-base">
-        <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg text-left">Class</th>
-        @foreach($topics as $topic)
-          <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg">
-            Avg Score<br><span class="font-normal">{{ $topic->topic_title }}</span> (%)
-          </th>
-        @endforeach
-        <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg">Students Passed</th>
-      </tr>
-    </thead>
-    <tbody class="text-white">
-      @foreach($classes as $class)
-        <tr class="hover:bg-[#132946] transition">
-          <td class="py-2 px-4 text-left font-medium">{{ $class }}</td>
-          @foreach($topics as $topic)
-            <td class="py-2 px-4">{{ $summary[$class]['topics'][$topic->id] ?? '-' }}</td>
-          @endforeach
-          <td class="py-2 px-4">
-            {{ $summary[$class]['students_passed'] ?? 0 }}/{{ $summary[$class]['students_count'] ?? 0 }}
-          </td>
-        </tr>
-      @endforeach
-    </tbody>
-  </table>
-</div>
+          <table class="min-w-full text-center border-separate border-spacing-y-3">
+            <thead>
+              <tr class="bg-[#0a132a] text-[#15f7fc] text-base">
+                <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg text-left">Class</th>
+                @foreach($topics as $topic)
+                <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg">
+                  <div class="flex flex-col items-center leading-tight">
+                    <span class="font-semibold">Avg Score</span>
+                    <span class="font-normal">{{ $topic->topic_title }}</span>
+                    <span class="text-sm font-normal text-[#15f7fc]">(%)</span>
+                  </div>
+                </th>
+
+                @endforeach
+                <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg">Students Passed</th>
+              </tr>
+            </thead>
+            <tbody class="text-white">
+              @foreach($classes as $class)
+                <tr class="hover:bg-[#132946] transition">
+                  <td class="py-2 px-4 text-left font-medium">{{ $class }}</td>
+                  @foreach($topics as $topic)
+                    <td class="py-2 px-4">{{ $summary[$class]['topics'][$topic->id] ?? '-' }}</td>
+                  @endforeach
+                  <td class="py-2 px-4">
+                    {{ $summary[$class]['students_passed'] ?? 0 }}/{{ $summary[$class]['students_count'] ?? 0 }}
+                  </td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+
         <hr class="border-white mb-8">
 
-        {{-- TOPIC Table --}}
+        <!-- TOPIC TABLE -->
         <div class="overflow-x-auto">
-  <table class="min-w-full text-center border-separate border-spacing-y-3">
-    <thead>
-      <tr class="bg-[#0a132a] text-[#15f7fc] text-base">
-        <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg text-left">Topic</th>
-        @foreach($classes as $class)
-          <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg">
-            {{ $class }}<br><span class="font-normal">Attempt/Total</span>
-          </th>
-        @endforeach
-        <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg">Avg Score (%)</th>
-      </tr>
-    </thead>
-    <tbody class="text-white">
-      @foreach($detailed as $row)
-        <tr class="hover:bg-[#132946] transition">
-          <td class="py-2 px-4 text-left font-medium">{{ $row['topic'] }}</td>
-          @foreach($classes as $class)
-            <td class="py-2 px-4">
-              <div class="font-semibold">{{ $row[$class]['attempt_string'] ?? '-' }}</div>
-              <div class="text-sm text-[#15f7fc]">{{ $row[$class]['avg'] ?? '-' }}%</div>
-            </td>
-          @endforeach
-          <td class="py-2 px-4 font-semibold">{{ $row['avg_score'] }}%</td>
-        </tr>
-      @endforeach
-    </tbody>
-  </table>
-</div>
+          <table class="min-w-full text-center border-separate border-spacing-y-3">
+            <thead>
+              <tr class="bg-[#0a132a] text-[#15f7fc] text-base">
+                <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg text-left">Topic</th>
+                @foreach($classes as $class)
+                  <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg">
+                    <div class="flex flex-col items-center">
+                      <span class="font-bold">{{ $class }}</span>
+                      <span class="font-normal text-sm text-white">Attempt</span>
+                    </div>
+                  </th>
+                @endforeach
+                <th class="py-2 px-4 border-b-2 border-[#15f7fc] font-semibold text-lg">Avg Score (%)</th>
+              </tr>
+            </thead>
+
+            <tbody class="text-white">
+              @foreach($detailed as $row)
+                <tr class="hover:bg-[#132946] transition">
+                  <td class="py-2 px-4 text-left font-medium">{{ $row['topic'] }}</td>
+                  @foreach($classes as $class)
+                    <td class="py-2 px-4">
+                      <div class="font-semibold">{{ $row[$class]['attempt_string'] ?? '-' }}</div>
+                      <div class="text-sm text-[#15f7fc]">{{ $row[$class]['avg'] ?? '-' }}%</div>
+                    </td>
+                  @endforeach
+                  <td class="py-2 px-4 font-semibold">{{ $row['avg_score'] }}%</td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
   </div>

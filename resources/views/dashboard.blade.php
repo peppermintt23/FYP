@@ -16,7 +16,7 @@
                 <a href="{{ route('exercises.manage', $topic->id ?? 1) }}" class="flex items-center space-x-3 sidebar-link">
                     <span>Manage Exercise</span>
                 </a>
-                <a href="report" class="flex items-center space-x-3 sidebar-link">
+                <a href="{{ route('viewReport') }}" class="flex items-center space-x-3 sidebar-link">
                     <span>Progress Report</span>
                 </a>
             </nav>
@@ -89,6 +89,7 @@
             @endif
             
         </main>
+
     </div>
 </div> 
 

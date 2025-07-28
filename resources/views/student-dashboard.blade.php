@@ -18,7 +18,7 @@
                             d="M3 9.75L12 4l9 5.75M4.5 10.5V19a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5v-8.5" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 22V12h6v10" />
                     </svg>
-                    <span>Dashboard</span>
+                    <span>Student Dashboard</span>
                 </a>
                 <a href="{{ route('notes.index') }}"
                     class="flex items-center space-x-3 hover:bg-[#142755bb] p-2 rounded">
@@ -92,36 +92,53 @@
                 <h2 class="text-3xl font-bold text-white mb-8">Learning progress</h2>
                 <!-- Progress Map (UI-only) -->
 
+<div class="overflow-x-auto w-full">
+    <div
+        x-data="progressMap(@json($percentages), {{ $activeIdx }})"
+        x-init="init()"
+        class="relative min-w-[1000px] h-64 mb-8 rounded-2xl overflow-hidden"
+        style="background: url('{{ asset('asset/bg.png') }}') center/cover no-repeat;"
+    >
+        <div class="absolute inset-0 bg-black opacity-30"></div>
 
-<div
-    x-data="progressMap(@json($percentages), {{ $activeIdx }})"
-    x-init="init()"
-    class="relative w-full h-64 mb-8 rounded-2xl overflow-hidden"
-    style="background: url('{{ asset('asset/bg.png') }}') center/cover no-repeat;"
->
-    <div class="absolute inset-0 bg-black opacity-30"></div>
-    <svg viewBox="0 0 800 200" class="absolute inset-0 w-full h-full">
-        <path x-ref="orbitPath" d="M50,150 C200,20 600,20 750,150" fill="none" stroke="#fff" stroke-width="3"/>
-    </svg>
-    <!-- Planets -->
-    <template x-for="(pct, idx) in percentages" :key="idx">
+        <!-- Orbit Path -->
+        <svg viewBox="0 0 800 200" class="absolute inset-0 w-full h-full">
+            <path
+                x-ref="orbitPath"
+                d="M50,150 
+                   C150,50 250,250 350,150 
+                   S550,50 650,150 
+                   S750,250 800,150"
+                fill="none"
+                stroke="#fff"
+                stroke-width="3"
+                stroke-dasharray="10 5"
+            />
+        </svg>
+
+        <!-- Planets -->
+        <template x-for="(pct, idx) in percentages" :key="idx">
+            <img
+                class="absolute w-13 h-12 planet-img"
+                :src="'/asset/planet/planet' + (idx+1) + '.png'"
+                :style="planetStyle(idx)"
+                :alt="'Planet ' + (idx+1)"
+                :title="'Topic ' + (idx+1) + ': ' + pct + '%'"
+            >
+        </template>
+
+        <!-- Astronaut -->
         <img
-            class="absolute w-12 h-12 planet-img"
-            :src="'/asset/planet/planet' + (idx+1) + '.png'"
-            :style="planetStyle(idx)"
-            :alt="'Planet ' + (idx+1)"
-            :title="'Topic ' + (idx+1) + ': ' + pct + '%'"
-        >
-    </template>
-    <!-- Astronaut Avatar -->
-    <img
-        class="astronaut absolute w-12"
-        src="{{ asset('asset/avatars/' . ($user->avatar ?? 'default-avatar.png')) }}"
-        alt="You are here"
-        :class="{ 'jump': jumping }"
-        :style="astronautStyle()"
-    />
+            class="astronaut absolute w-12"
+            src="{{ asset('asset/avatars/' . ($user->avatar ?? 'default-avatar.png')) }}"
+            alt="You are here"
+            :class="{ 'jump': jumping }"
+            :style="astronautStyle()"
+        />
+    </div>
 </div>
+
+
 
 
 <script src="//unpkg.com/alpinejs" defer></script>

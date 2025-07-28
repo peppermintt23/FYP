@@ -81,28 +81,33 @@
                         </button>
 
                         <div x-show="open" x-transition class="mt-2 bg-[#08152a] rounded-lg border border-[#15f7fc]/20 shadow-inner">
-                            @if ($topic->notes->isEmpty())
-                                <p class="text-[#13e2be] p-4">No notes uploaded yet.</p>
-                            @else
-                                <ul class="divide-y divide-[#15f7fc]/20">
-                                    @foreach ($topic->notes as $note)
-                                        <li class="flex justify-between items-center p-3">
-                                            <span class="text-white">{{ basename($note->file_note) }}</span>
-                                            <div class="space-x-2">
-                                                <button type="button"
-                                                    class="neon-btn px-3 py-1">
-                                                    View
-                                                </button>
-                                                <a href="{{ route('notes.download', $note->id) }}"
-                                                   class="neon-btn px-3 py-1">
-                                                   Download
-                                                </a>
-                                            </div>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </div>
+                        @if ($topic->notes->isEmpty())
+                            <p class="text-[#13e2be] p-4">No notes uploaded yet.</p>
+                        @else
+                            <ul class="divide-y divide-[#15f7fc]/20">
+                                @foreach ($topic->notes as $note)
+                                    <li class="flex justify-between items-center p-3">
+                                        <span class="text-white">{{ basename($note->file_note) }}</span>
+                                        <div class="space-x-2">
+                                            <a href="{{ route('notes.show', $note->id) }}"
+                                            target="_blank"
+                                            class="neon-btn px-3 py-1">
+                                            View
+                                            </a>
+
+
+
+                                            <a href="{{ route('notes.download', $note->id) }}"
+                                            class="neon-btn px-3 py-1">
+                                            Download
+                                            </a>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+
                     </div>
                 @endforeach
             </div>

@@ -133,6 +133,7 @@
                     <a href="{{ route('profile.edit') }}" class="edit-btn w-full flex-1 text-center">Edit</a>
                 </div>
 
+
             </div>
         </form>
 
@@ -165,8 +166,15 @@
             </div>
             </div>
 
+            
+
            <!-- COMPLETION -->
             <div class="text-lg font-bold text-[#13e2be] mb-3">EXERCISE COMPLETION</div>
+             <a href="{{ url('/student/leaderboard/personal') }}" class="flex items-center space-x-3">
+                    <button class="personal-leaderboard-btn mb-4 position-center">
+                            PERSONAL LEADERBOARD
+                    </button>
+            </a>
             <div class="progress-table bg-[#101b2a] border-2 border-[#15f7fc66] rounded-xl shadow p-5 mb-6 max-h-[480px] overflow-y-auto custom-scroll-vert">
 
             @foreach($topics as $topic)
@@ -178,10 +186,6 @@
                     {{-- optional subtitle if you have one: --}}
                     {{ $topic->topic_subtitle ?? '' }}
                 </div>
-
-                <button class="personal-leaderboard-btn mb-4">
-                    PERSONAL LEADERBOARD
-                </button>
 
                 @foreach($topic->exercises as $exercise)
                     @php
