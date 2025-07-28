@@ -38,63 +38,26 @@ class ProfileController extends Controller
      * Update the user's profile information.
      */
     public function update(Request $request)
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        $rules = [
-            'name' => 'required|string|max:255',
-            'student_number' => 'nullable|string|max:255,' . $user->id,
-            'room_number' => 'nullable|string|max:255',
-            'phone_number' => 'nullable|string|max:20',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'avatar'         => 'nullable|string|max:255',
-        ];
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'student_number' => 'nullable|string|max:255',
+        'email' => $request->has('email') ? 'required|string|email|max:255|unique:users,email,' . $user->id : 'nullable',
 
-        // Add role-specific validation
-        if ($user->role === 'lecturer') {
-            $rules['staff_number'] = 'nullable|string|max:255';
-        }
+        'avatar' => 'nullable|string|max:255',
+        'phone_number' => 'nullable|string|max:255',
+        'staff_number' => 'nullable|string|max:255',
+        'room_number' => 'nullable|string|max:255',
+    ]);
 
-        if ($user->role === 'student') {
-            $rules['student_number'] = 'nullable|string|max:255';
-        }
+    $user->update($validated);
 
-        if (!empty($data['avatar'])) {
-            $user->avatar = $rules['avatar'];
-        }
+    return back()->with('status', 'profile-updated');
+}
 
-        $validated = $request->validate($rules);
 
-        // Filter based on role
-        $updateFields = [
-            'name', 'email', 'phone_number', 'position', 'room_number', 'avatar'
-        ];
-
-        if ($user->role === 'lecturer') {
-            $updateFields[] = 'staff_number';
-        }
-
-        if ($user->role === 'student') {
-            $updateFields[] = 'student_number';
-        }
-
-        $userData = [];
-                foreach ($updateFields as $field) {
-                    if ($request->has($field)) {
-                $userData[$field] = $request->input($field);
-                    }
-                }
-
-         // 2) Save the chosen avatar filename
-        if (isset($data['avatar'])) {
-            $user->avatar = $userData['avatar'];
-        }
-
-        $userData = Arr::only($validated, $updateFields);
-        $user->update($userData);
-                
-                return back()->with('status', 'profile-updated');
-            }
 
 
     /**
