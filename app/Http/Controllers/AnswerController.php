@@ -106,7 +106,7 @@ class AnswerController extends Controller
         $rawScore = $answer->student_score ?? 0;
 
         // 2) Calculate your score
-        $finalScore = ($elapsed <= 60 && $rawScore > 0)
+        $finalScore = ($elapsed <= 600 && $rawScore > 0)
         ? $rawScore * 2
         : $rawScore;
 
